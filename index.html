@@ -472,6 +472,89 @@
   .plan.cyan .features-list li::before { content: '▸ '; color: var(--neon-cyan); }
   .plan.magenta .features-list li::before { content: '▸ '; color: var(--neon-magenta); }
 
+  /* ═══════════════ SINGLE PLAN PRICING ═══════════════ */
+  .pricing-single {
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+  .plan-single {
+    background: var(--bg-card);
+    border: 1px solid var(--neon-cyan);
+    padding: 32px 28px;
+    text-align: center;
+    position: relative;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    box-shadow:
+      inset 0 0 30px rgba(0,240,255,0.06),
+      0 0 30px rgba(0,240,255,0.15);
+  }
+  .plan-badge {
+    position: absolute; top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--neon-magenta);
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px;
+    padding: 5px 18px;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .plan-single h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    text-shadow: var(--glow-cyan);
+    margin: 8px 0 16px;
+  }
+  .price-row {
+    display: flex; align-items: baseline; justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .price-old {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px; font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  .price-now {
+    font-family: 'Orbitron', monospace;
+    font-size: 48px; font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: var(--glow-cyan);
+    letter-spacing: -2px;
+  }
+  .price-row small {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .price-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--neon-magenta);
+    text-shadow: 0 0 6px rgba(255,0,170,0.3);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .plan-single .features-list {
+    text-align: left; list-style: none;
+    margin: 0; font-size: 14px;
+  }
+  .plan-single .features-list li {
+    padding: 6px 0;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+  }
+  .plan-single .features-list li::before {
+    content: '▸ ';
+    color: var(--neon-cyan);
+  }
+
   /* ═══════════════ CTA BLOCK ═══════════════ */
   .cta-block {
     background: linear-gradient(135deg, rgba(0,240,255,0.03) 0%, rgba(255,0,170,0.03) 100%);
@@ -800,7 +883,7 @@
     </div>
 
     <div class="why-cta">
-      <p>&gt; RM 19/月，省下每天 2 小时的刷帖时间。3 天免费试用，不满意不收费。_</p>
+      <p>&gt; 早鸟价 RM 9.90/月，省下每天 2 小时的刷帖时间。3 天免费试用，不满意不收费。_</p>
     </div>
   </div>
 </section>
@@ -850,25 +933,23 @@
     </div>
     <p class="blur-note">&gt; 实际表格含完整帖文原文、备注等更多字段 _</p>
 
-    <div class="pricing-grid">
-      <div class="plan cyan">
-        <h4>基础版</h4>
-        <div class="price">RM 19<small>/月</small></div>
-        <ul class="features-list">
-          <li>2 个 JB 租房群组</li>
-          <li>Google Sheets 每日更新</li>
-          <li>去重 · 过滤噪音</li>
-          <li>3 天免费试用</li>
-        </ul>
-      </div>
-      <div class="plan magenta">
+    <!-- SINGLE PLAN -->
+    <div class="pricing-single">
+      <div class="plan-single">
+        <div class="plan-badge">🔥 早鸟优惠</div>
         <h4>标准版</h4>
-        <div class="price">RM 39<small>/月</small></div>
+        <div class="price-row">
+          <span class="price-old">RM 39.90</span>
+          <span class="price-now">RM 9.90</span>
+          <small>/月</small>
+        </div>
+        <p class="price-note">限时推广价 · 用户稳定后恢复原价</p>
         <ul class="features-list">
-          <li>基础版全部功能</li>
-          <li>WhatsApp 新房源即时通知</li>
-          <li>自定义关注关键词</li>
-          <li>优先客服支持</li>
+          <li>5 个 JB 租房群组覆盖</li>
+          <li>Google Sheets 实时数据 · 只读共享</li>
+          <li>AI 自动去重 · 过滤噪音 · 结构化分类</li>
+          <li>WhatsApp 每日推送 3 次（9am / 2pm / 8pm）</li>
+          <li>3 天免费试用 · 不满意不收费</li>
         </ul>
       </div>
     </div>
