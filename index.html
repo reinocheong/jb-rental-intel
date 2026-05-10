@@ -609,6 +609,105 @@
   footer a { color: var(--neon-cyan); text-decoration: none; }
   footer a:hover { text-shadow: 0 0 6px rgba(0,240,255,0.4); }
 
+  /* ═══════════════ WHY SECTION ═══════════════ */
+  .why-section { padding: 70px 0 20px; }
+  .why-section h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .why-section h2 .cyan { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+  .why-section .why-sub {
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+  }
+
+  /* Pain → Solution comparison */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: start;
+    margin-bottom: 40px;
+  }
+  .compare-col h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 8px 0;
+  }
+  .compare-col.bad h3 {
+    color: #ff4444;
+    border-bottom: 1px solid rgba(255,68,68,0.3);
+    text-shadow: 0 0 8px rgba(255,68,68,0.4);
+  }
+  .compare-col.good h3 {
+    color: var(--neon-cyan);
+    border-bottom: 1px solid var(--border-neon);
+    text-shadow: 0 0 8px rgba(0,240,255,0.4);
+  }
+  .compare-vs {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%;
+    padding-top: 30px;
+  }
+  .compare-vs span {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px; font-weight: 900;
+    color: var(--neon-magenta);
+    text-shadow: var(--glow-magenta);
+    background: var(--bg-surface);
+    width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,0,170,0.3);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .compare-item {
+    background: var(--bg-card);
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .compare-item.bad { border: 1px solid rgba(255,68,68,0.15); }
+  .compare-item.good { border: 1px solid rgba(0,240,255,0.2); }
+  .compare-item .icon { font-size: 18px; margin-right: 6px; }
+  .compare-item.bad .icon { color: #ff4444; }
+  .compare-item.good .icon { color: var(--neon-cyan); text-shadow: 0 0 6px rgba(0,240,255,0.4); }
+
+  /* Bottom CTA in why section */
+  .why-cta {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .why-cta p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px;
+    color: var(--neon-cyan);
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px rgba(0,240,255,0.3);
+  }
+
+  @media (max-width: 768px) {
+    .compare-grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .compare-vs { padding: 10px 0; }
+    .compare-vs span { width: 36px; height: 36px; font-size: 14px; }
+    .why-section { padding: 50px 0 10px; }
+  }
+
   /* ═══════════════ RESPONSIVE ═══════════════ */
   @media (max-width: 768px) {
     .hero { padding: 60px 0 50px; }
@@ -643,6 +742,65 @@
     <div class="hero-cta-row">
       <a href="#radar" class="btn-cyan">⚡ 探索市场雷达</a>
       <a href="#contract" class="btn-magenta">⚡ 智能合同 Bot</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WHY: 痛点 VS 方案 ═══════════════ -->
+<section class="why-section">
+  <div class="container">
+    <h2><span class="cyan">◆</span> 为什么你需要 <span class="cyan">市场雷达</span>？</h2>
+    <p class="why-sub">&gt; JB 每天几百条租房帖，真正能租的不到 30%。你的时间不该浪费在刷屏上。</p>
+
+    <div class="compare-grid">
+      <!-- BAD: 没有市场雷达 -->
+      <div class="compare-col bad">
+        <h3>❌ 没有市场雷达</h3>
+        <div class="compare-item bad">
+          <span class="icon">⏳</span> <strong>每天刷 FB 2-3 小时</strong><br>
+          翻十几个群组，手动翻帖，眼睛都花了
+        </div>
+        <div class="compare-item bad">
+          <span class="icon">🐌</span> <strong>好房源被别人抢走</strong><br>
+          帖子发了 3 小时你才看到，租客早联系别人了
+        </div>
+        <div class="compare-item bad">
+          <span class="icon">🤯</span> <strong>几百条噪音手动过滤</strong><br>
+          求租帖、广告、重复帖、评论区回复……真假难辨
+        </div>
+        <div class="compare-item bad">
+          <span class="icon">📵</span> <strong>离开手机就断线</strong><br>
+          吃饭、见客户、睡觉 = 错过新房源
+        </div>
+      </div>
+
+      <!-- VS -->
+      <div class="compare-vs"><span>VS</span></div>
+
+      <!-- GOOD: 有市场雷达 -->
+      <div class="compare-col good">
+        <h3>✅ 有市场雷达</h3>
+        <div class="compare-item good">
+          <span class="icon">⚡</span> <strong>打开 Google Sheet 就行了</strong><br>
+          系统每 30 分钟自动扫描，你只需要看结果
+        </div>
+        <div class="compare-item good">
+          <span class="icon">🚀</span> <strong>永远比对手快一步</strong><br>
+          新帖子半小时入库，你第一个联系屋主
+        </div>
+        <div class="compare-item good">
+          <span class="icon">🎯</span> <strong>只看真正能租的帖子</strong><br>
+          AI 自动过滤求租、广告、重复、缝合怪
+        </div>
+        <div class="compare-item good">
+          <span class="icon">🔔</span> <strong>WhatsApp 即时推送</strong><br>
+          新房源直接发到手机，你在哪里都不错过
+        </div>
+      </div>
+    </div>
+
+    <div class="why-cta">
+      <p>&gt; RM 19/月，省下每天 2 小时的刷帖时间。3 天免费试用，不满意不收费。_</p>
     </div>
   </div>
 </section>
