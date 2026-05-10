@@ -791,6 +791,29 @@
     .why-section { padding: 50px 0 10px; }
   }
 
+  /* ═══════════════ REGISTRATION STEPS ═══════════════ */
+  .reg-steps { text-align: left; max-width: 380px; margin: 0 auto; }
+  .reg-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+  }
+  .reg-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    flex-shrink: 0;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px; font-weight: 700;
+    color: var(--neon-cyan);
+    background: rgba(0,240,255,0.08);
+    border: 1px solid rgba(0,240,255,0.3);
+    clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+    text-shadow: 0 0 4px rgba(0,240,255,0.4);
+  }
+
   /* ═══════════════ RESPONSIVE ═══════════════ */
   @media (max-width: 768px) {
     .hero { padding: 60px 0 50px; }
@@ -954,9 +977,17 @@
       </div>
     </div>
 
+    <!-- REGISTRATION FLOW -->
     <div class="cta-block">
-      <p>📩 <strong>Stripe 自动付款 · 3 天免费试用</strong></p>
-      <p class="wa-num">WhatsApp: +60 1X-XXXXXXX</p>
+      <h3 style="font-family:'Orbitron',monospace;font-size:15px;letter-spacing:2px;color:var(--neon-cyan);margin-bottom:16px;">⬡ 如何开始免费试用？</h3>
+      <div class="reg-steps">
+        <div class="reg-step"><span class="reg-num">01</span> 点击下方 WhatsApp 按钮</div>
+        <div class="reg-step"><span class="reg-num">02</span> 发送你的 <strong>名字 + Email</strong></div>
+        <div class="reg-step"><span class="reg-num">03</span> 立即收到 Google Sheets 链接，开始试用</div>
+        <div class="reg-step"><span class="reg-num">04</span> 第 3 天收到付款提醒，满意再付费</div>
+      </div>
+      <p style="margin-top:16px;font-size:12px;color:var(--text-muted);">不用先付款 · 不用绑卡 · 不满意直接不理就好</p>
+      <a href="https://wa.me/601XXXXXXXX?text=Hi%20%E6%88%91%E8%A6%81%E8%AF%95%E7%94%A8%E5%B8%82%E5%9C%BA%E9%9B%B7%E8%BE%BE%EF%BC%8C%E6%88%91%E7%9A%84%E5%90%8D%E5%AD%97%E6%98%AF%EF%BC%9A" class="btn-cyan" style="margin-top:14px;" target="_blank">⚡ WhatsApp 立即试用</a>
     </div>
 
     <div class="cross-promo">
