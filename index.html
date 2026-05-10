@@ -108,29 +108,15 @@
   }
 
   .glitch-text {
-    position: relative;
-    display: inline-block;
+    display: inline;
     color: var(--neon-cyan);
     animation: neon-flicker 3s infinite alternate;
-  }
-  .glitch-text::before,
-  .glitch-text::after {
-    content: attr(data-text);
-    position: absolute; left: 0; top: 0;
-    width: 100%; height: 100%;
-    opacity: 0.8;
-  }
-  .glitch-text::before {
-    color: var(--neon-magenta);
-    animation: glitch 2s infinite;
-    clip-path: inset(0 0 70% 0);
-    z-index: -1;
-  }
-  .glitch-text::after {
-    color: var(--neon-cyan);
-    animation: glitch 3s infinite reverse;
-    clip-path: inset(30% 0 0 0);
-    z-index: -1;
+    text-shadow:
+      0 0 7px var(--neon-cyan),
+      0 0 20px var(--neon-cyan),
+      0 0 40px var(--neon-cyan),
+      2px 0 2px rgba(255,0,170,0.4),
+      -2px 0 2px rgba(0,240,255,0.3);
   }
 
   /* ═══════════════ NEON BORDERS ═══════════════ */
