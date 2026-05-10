@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Tenancy Pro — 掌握 JB 租房市场的最新消息</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════ CYBERPUNK DESIGN SYSTEM ═══════════════ */
+  :root {
+    --bg-deep: #050508;
+    --bg-surface: #0a0a14;
+    --bg-card: #0d0d1a;
+    --neon-cyan: #00f0ff;
+    --neon-magenta: #ff00aa;
+    --neon-pink: #ff2d95;
+    --neon-green: #00ff41;
+    --neon-yellow: #ffd700;
+    --neon-purple: #b44dff;
+    --text-primary: #e0e0f0;
+    --text-muted: #6a6a8a;
+    --border-dim: #1a1a30;
+    --border-neon: rgba(0,240,255,0.3);
+    --glow-cyan: 0 0 10px rgba(0,240,255,0.5), 0 0 40px rgba(0,240,255,0.15);
+    --glow-magenta: 0 0 10px rgba(255,0,170,0.5), 0 0 40px rgba(255,0,170,0.15);
+    --glow-green: 0 0 8px rgba(0,255,65,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══════════════ BACKGROUND EFFECTS ═══════════════ */
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(0,240,255,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(255,0,170,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 90%, rgba(180,77,255,0.02) 0%, transparent 40%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Grid overlay */
+  body::after {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  }
+
+  /* Scan lines */
+  .scanlines {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none; z-index: 1;
+  }
+
+  /* ═══════════════ LAYOUT ═══════════════ */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+
+  /* ═══════════════ GLITCH TEXT ═══════════════ */
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(1px, 1px); }
+  }
+  @keyframes glitch-clip {
+    0%, 100% { clip-path: inset(0 0 0 0); }
+    20% { clip-path: inset(20% 0 60% 0); }
+    40% { clip-path: inset(60% 0 10% 0); }
+    60% { clip-path: inset(10% 0 70% 0); }
+    80% { clip-path: inset(40% 0 30% 0); }
+  }
+  @keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      text-shadow:
+        0 0 7px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 40px var(--neon-cyan),
+        0 0 80px var(--neon-cyan);
+    }
+    20%, 24%, 55% {
+      text-shadow:
+        0 0 4px var(--neon-cyan),
+        0 0 10px var(--neon-cyan);
+    }
+  }
+
+  .glitch-text {
+    position: relative;
+    display: inline-block;
+    color: var(--neon-cyan);
+    animation: neon-flicker 3s infinite alternate;
+  }
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute; left: 0; top: 0;
+    width: 100%; height: 100%;
+    opacity: 0.8;
+  }
+  .glitch-text::before {
+    color: var(--neon-magenta);
+    animation: glitch 2s infinite;
+    clip-path: inset(0 0 70% 0);
+    z-index: -1;
+  }
+  .glitch-text::after {
+    color: var(--neon-cyan);
+    animation: glitch 3s infinite reverse;
+    clip-path: inset(30% 0 0 0);
+    z-index: -1;
+  }
+
+  /* ═══════════════ NEON BORDERS ═══════════════ */
+  .neon-border {
+    position: relative;
+    border: 1px solid var(--border-neon);
+    box-shadow:
+      inset 0 0 20px rgba(0,240,255,0.05),
+      0 0 15px rgba(0,240,255,0.1);
+    transition: box-shadow 0.3s;
+  }
+  .neon-border:hover {
+    box-shadow:
+      inset 0 0 30px rgba(0,240,255,0.1),
+      0 0 25px rgba(0,240,255,0.2);
+  }
+
+  .neon-border-magenta {
+    border: 1px solid rgba(255,0,170,0.3);
+    box-shadow:
+      inset 0 0 20px rgba(255,0,170,0.05),
+      0 0 15px rgba(255,0,170,0.1);
+  }
+  .neon-border-magenta:hover {
+    box-shadow:
+      inset 0 0 30px rgba(255,0,170,0.1),
+      0 0 25px rgba(255,0,170,0.2);
+  }
+
+  /* ═══════════════ HERO ═══════════════ */
+  .hero {
+    padding: 100px 0 80px;
+    text-align: center;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,240,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero .brand-tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--neon-magenta);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,0,170,0.5);
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero h1 .highlight { color: var(--neon-magenta); text-shadow: var(--glow-magenta); }
+
+  .hero .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 580px;
+    margin: 0 auto 40px;
+    letter-spacing: 1px;
+    line-height: 1.7;
+  }
+
+  .hero-cta-row {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  }
+
+  /* ═══════════════ BUTTONS ═══════════════ */
+  .btn-cyan {
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    position: relative;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    transition: all 0.3s;
+    text-shadow: 0 0 8px rgba(0,240,255,0.5);
+    box-shadow: inset 0 0 15px rgba(0,240,255,0.1), 0 0 20px rgba(0,240,255,0.15);
+  }
+  .btn-cyan:hover {
+    background: rgba(0,240,255,0.08);
+    box-shadow: inset 0 0 25px rgba(0,240,255,0.2), 0 0 40px rgba(0,240,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-magenta {
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 14px 32px;
+    background: rgba(255,0,170,0.1);
+    color: var(--neon-magenta);
+    border: 1px solid var(--neon-magenta);
+    position: relative;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    transition: all 0.3s;
+    text-shadow: 0 0 8px rgba(255,0,170,0.5);
+    box-shadow: inset 0 0 15px rgba(255,0,170,0.1), 0 0 20px rgba(255,0,170,0.15);
+  }
+  .btn-magenta:hover {
+    background: rgba(255,0,170,0.15);
+    box-shadow: inset 0 0 25px rgba(255,0,170,0.2), 0 0 40px rgba(255,0,170,0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-tg {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 12px 28px;
+    background: rgba(0,240,255,0.08);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0,240,255,0.4);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: all 0.3s;
+  }
+  .btn-tg:hover {
+    background: rgba(0,240,255,0.15);
+    box-shadow: 0 0 30px rgba(0,240,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ═══════════════ SECTION DIVIDERS ═══════════════ */
+  .neon-divider {
+    position: relative;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    margin: 60px 0;
+    opacity: 0.4;
+  }
+  .neon-divider::after {
+    content: '◆';
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--neon-cyan);
+    font-size: 10px;
+    background: var(--bg-deep);
+    padding: 0 12px;
+    text-shadow: 0 0 6px var(--neon-cyan);
+  }
+
+  /* ═══════════════ PRODUCT SECTIONS ═══════════════ */
+  .product { padding: 50px 0; }
+
+  .product-header { margin-bottom: 32px; }
+
+  .product-header .tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    margin-bottom: 14px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .tag-radar { background: rgba(0,240,255,0.1); color: var(--neon-cyan); border: 1px solid rgba(0,240,255,0.3); }
+  .tag-contract { background: rgba(180,77,255,0.1); color: var(--neon-purple); border: 1px solid rgba(180,77,255,0.3); }
+
+  .product-header h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 4vw, 26px);
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .product-header h2 .cyan { color: var(--neon-cyan); }
+  .product-header h2 .purple { color: var(--neon-purple); }
+
+  .product-header .desc {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 620px;
+    line-height: 1.7;
+  }
+
+  /* ═══════════════ FEATURE GRID ═══════════════ */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .feature-card {
+    background: var(--bg-card);
+    padding: 22px 18px;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: all 0.3s;
+  }
+  .feature-card.cyan { border: 1px solid rgba(0,240,255,0.2); }
+  .feature-card.magenta { border: 1px solid rgba(255,0,170,0.2); }
+  .feature-card:hover { transform: translateY(-3px); }
+  .feature-card.cyan:hover {
+    border-color: rgba(0,240,255,0.5);
+    box-shadow: 0 0 20px rgba(0,240,255,0.1);
+  }
+  .feature-card.magenta:hover {
+    border-color: rgba(255,0,170,0.5);
+    box-shadow: 0 0 20px rgba(255,0,170,0.1);
+  }
+
+  .feature-card .icon {
+    font-size: 22px; margin-bottom: 10px;
+    display: inline-block;
+  }
+  .feature-card.cyan .icon { text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+  .feature-card.magenta .icon { text-shadow: 0 0 10px rgba(255,0,170,0.4); }
+
+  .feature-card h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .feature-card.cyan h4 { color: var(--neon-cyan); }
+  .feature-card.magenta h4 { color: var(--neon-purple); }
+
+  .feature-card p {
+    font-size: 13px; color: var(--text-muted); line-height: 1.5;
+  }
+
+  /* ═══════════════ DATA TABLE ═══════════════ */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-neon);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    margin-bottom: 18px;
+  }
+  .table-wrap table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+  }
+  .table-wrap th {
+    text-align: left; padding: 12px 14px;
+    background: rgba(0,240,255,0.05);
+    color: var(--neon-cyan);
+    font-weight: 600; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-neon);
+    white-space: nowrap;
+  }
+  .table-wrap td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    white-space: nowrap;
+  }
+  .table-wrap .rent { color: var(--neon-green); font-weight: 600; text-shadow: var(--glow-green); }
+  .table-wrap tr:hover td { background: rgba(0,240,255,0.02); }
+
+  .blur-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; color: var(--text-muted);
+    text-align: center; margin-bottom: 24px;
+    letter-spacing: 1px;
+  }
+
+  /* ═══════════════ PRICING ═══════════════ */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .plan {
+    background: var(--bg-card);
+    padding: 28px 22px;
+    text-align: center;
+    position: relative;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: all 0.3s;
+  }
+  .plan.cyan { border: 1px solid rgba(0,240,255,0.25); }
+  .plan.magenta { border: 1px solid rgba(255,0,170,0.35); }
+
+  .plan.magenta::before {
+    content: '推荐';
+    position: absolute; top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--neon-magenta);
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 16px;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    text-shadow: none;
+  }
+
+  .plan h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .plan.cyan h4 { color: var(--neon-cyan); }
+  .plan.magenta h4 { color: var(--neon-magenta); }
+
+  .plan .price {
+    font-family: 'Orbitron', monospace;
+    font-size: 36px; font-weight: 900;
+    margin-bottom: 6px;
+    letter-spacing: -1px;
+  }
+  .plan.cyan .price { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+  .plan.magenta .price { color: var(--neon-magenta); text-shadow: var(--glow-magenta); }
+
+  .plan .price small {
+    font-size: 13px; font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0;
+  }
+
+  .plan .features-list {
+    text-align: left; list-style: none;
+    margin: 18px 0; font-size: 13px;
+  }
+  .plan .features-list li {
+    padding: 5px 0;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .plan.cyan .features-list li::before { content: '▸ '; color: var(--neon-cyan); }
+  .plan.magenta .features-list li::before { content: '▸ '; color: var(--neon-magenta); }
+
+  /* ═══════════════ CTA BLOCK ═══════════════ */
+  .cta-block {
+    background: linear-gradient(135deg, rgba(0,240,255,0.03) 0%, rgba(255,0,170,0.03) 100%);
+    border: 1px solid var(--border-neon);
+    padding: 28px 32px;
+    text-align: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    margin-bottom: 24px;
+  }
+  .cta-block p { color: var(--text-muted); font-size: 14px; margin-bottom: 14px; }
+  .cta-block .wa-num {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--neon-cyan);
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(0,240,255,0.3);
+  }
+
+  /* ═══════════════ CROSS PROMO ═══════════════ */
+  .cross-promo {
+    border: 1px dashed rgba(255,0,170,0.3);
+    padding: 18px 22px;
+    text-align: center;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .cross-promo a {
+    color: var(--neon-magenta);
+    text-decoration: none;
+    font-weight: 600;
+    text-shadow: 0 0 6px rgba(255,0,170,0.3);
+  }
+  .cross-promo a:hover { text-decoration: underline; }
+
+  /* ═══════════════ STEPS ═══════════════ */
+  .steps-list { display: grid; gap: 14px; margin-bottom: 24px; }
+
+  .step {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: var(--bg-card);
+    padding: 18px 20px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    border: 1px solid rgba(180,77,255,0.2);
+    transition: all 0.3s;
+  }
+  .step:hover {
+    border-color: rgba(180,77,255,0.4);
+    box-shadow: 0 0 15px rgba(180,77,255,0.1);
+  }
+
+  .step .num {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Orbitron', monospace;
+    font-size: 18px; font-weight: 900;
+    color: var(--neon-purple);
+    background: rgba(180,77,255,0.08);
+    border: 1px solid rgba(180,77,255,0.3);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    text-shadow: 0 0 8px rgba(180,77,255,0.4);
+  }
+
+  .step h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--neon-purple);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .step p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ═══════════════ TG CTA ═══════════════ */
+  .tg-cta {
+    background: linear-gradient(135deg, rgba(180,77,255,0.05) 0%, rgba(0,240,255,0.05) 100%);
+    border: 1px solid rgba(180,77,255,0.3);
+    padding: 28px 32px;
+    text-align: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    margin-top: 20px;
+  }
+  .tg-cta .icon { font-size: 32px; margin-bottom: 10px; }
+  .tg-cta h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--neon-purple);
+    margin-bottom: 6px;
+  }
+  .tg-cta p { font-size: 14px; color: var(--text-muted); margin-bottom: 18px; }
+
+  /* ═══════════════ FAQ ═══════════════ */
+  .faq { padding: 50px 0; }
+  .faq h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px; font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    text-shadow: var(--glow-cyan);
+    margin-bottom: 28px;
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--border-dim);
+    padding: 18px 0;
+    transition: all 0.3s;
+  }
+  .faq-item:hover { border-color: rgba(0,240,255,0.2); }
+  .faq-item h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .faq-item h4::before { content: '[Q] '; color: var(--neon-cyan); font-size: 11px; }
+  .faq-item p {
+    font-size: 14px; color: var(--text-muted);
+    padding-left: 28px;
+  }
+
+  /* ═══════════════ FOOTER ═══════════════ */
+  footer {
+    padding: 40px 0 60px;
+    text-align: center;
+    border-top: 1px solid var(--border-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    position: relative; z-index: 2;
+  }
+  footer a { color: var(--neon-cyan); text-decoration: none; }
+  footer a:hover { text-shadow: 0 0 6px rgba(0,240,255,0.4); }
+
+  /* ═══════════════ RESPONSIVE ═══════════════ */
+  @media (max-width: 768px) {
+    .hero { padding: 60px 0 50px; }
+    .hero h1 { font-size: 26px; }
+    .hero .subtitle { font-size: 15px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .steps-list { grid-template-columns: 1fr; }
+    .btn-cyan, .btn-magenta { font-size: 12px; padding: 12px 24px; }
+    .hero-cta-row { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="brand-tag">◈ Smart Tenancy Pro ◈</div>
+    <h1>
+      <span>想要掌握</span>
+      <span class="glitch-text" data-text="JB 租房市场">JB 租房市场</span>
+      <span>的</span><br>
+      <span class="highlight">最新消息吗？</span>
+    </h1>
+    <p class="subtitle">
+      从发现到签约，一站式工具链。<br>
+      别人还在刷 FB，你已经联系了屋主。
+    </p>
+    <div class="hero-cta-row">
+      <a href="#radar" class="btn-cyan">⚡ 探索市场雷达</a>
+      <a href="#contract" class="btn-magenta">⚡ 智能合同 Bot</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PRODUCT 1: 市场雷达 ═══════════════ -->
+<section class="product" id="radar">
+  <div class="container">
+    <div class="product-header">
+      <div class="tag tag-radar">// PRODUCT_01</div>
+      <h2><span class="cyan">◆</span> 市场雷达 — FB 租房数据自动抓取</h2>
+      <p class="desc">不再手动刷 Facebook 小组。系统每 30 分钟自动扫描、分类、去重，把真正的出租房源整理成 Google Sheets，每天更新。</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card cyan">
+        <div class="icon">⟳</div>
+        <h4>每 30 分钟自动更新</h4>
+        <p>新帖子一出，半小时进入你的表格</p>
+      </div>
+      <div class="feature-card cyan">
+        <div class="icon">⌬</div>
+        <h4>自动过滤噪音</h4>
+        <p>求租帖、广告、重复帖、评论区缝合怪全部剔除</p>
+      </div>
+      <div class="feature-card cyan">
+        <div class="icon">▣</div>
+        <h4>结构化数据</h4>
+        <p>地区、房型、租金、家私、电话、链接 — 全部分类</p>
+      </div>
+      <div class="feature-card cyan">
+        <div class="icon">↗</div>
+        <h4>直达原帖</h4>
+        <p>每条数据带 FB 链接，一键跳转联系屋主</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Agent</th><th>地区</th><th>房型</th><th>家私</th><th>租金</th><th>电话</th><th>时间</th></tr></thead>
+        <tbody>
+          <tr><td>Properties JB</td><td>V Summer</td><td>Studio</td><td>全家私</td><td class="rent">RM 1,200</td><td>012-3456789</td><td>10:30</td></tr>
+          <tr><td>R&F Agent</td><td>R&F Cove</td><td>3房2厕</td><td>半家私</td><td class="rent">RM 2,800</td><td>016-9876543</td><td>10:30</td></tr>
+          <tr><td>Tony Tan</td><td>C.Garden</td><td>2房1厕</td><td>全家私</td><td class="rent">RM 1,800</td><td>019-1112222</td><td>10:00</td></tr>
+          <tr><td>SKL Props</td><td>TriTower</td><td>1房1厕</td><td>无家私</td><td class="rent">RM 1,500</td><td>—</td><td>09:30</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="blur-note">&gt; 实际表格含完整帖文原文、备注等更多字段 _</p>
+
+    <div class="pricing-grid">
+      <div class="plan cyan">
+        <h4>基础版</h4>
+        <div class="price">RM 19<small>/月</small></div>
+        <ul class="features-list">
+          <li>2 个 JB 租房群组</li>
+          <li>Google Sheets 每日更新</li>
+          <li>去重 · 过滤噪音</li>
+          <li>3 天免费试用</li>
+        </ul>
+      </div>
+      <div class="plan magenta">
+        <h4>标准版</h4>
+        <div class="price">RM 39<small>/月</small></div>
+        <ul class="features-list">
+          <li>基础版全部功能</li>
+          <li>WhatsApp 新房源即时通知</li>
+          <li>自定义关注关键词</li>
+          <li>优先客服支持</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <p>📩 <strong>Stripe 自动付款 · 3 天免费试用</strong></p>
+      <p class="wa-num">WhatsApp: +60 1X-XXXXXXX</p>
+    </div>
+
+    <div class="cross-promo">
+      <p>📄 找到房源了？试试用 <a href="#contract">智能合同 Bot</a> 出一份专业 Tenancy Agreement ↓</p>
+    </div>
+  </div>
+</section>
+
+<div class="neon-divider"></div>
+
+<!-- ═══════════════ PRODUCT 2: 智能合同 ═══════════════ -->
+<section class="product" id="contract">
+  <div class="container">
+    <div class="product-header">
+      <div class="tag tag-contract">// PRODUCT_02</div>
+      <h2><span class="purple">◆</span> 智能合同 — Telegram Bot 一键生成 Tenancy Agreement</h2>
+      <p class="desc">打开 Telegram 填表 → 自动生成专业合同 → 一键提交 Stamping。AI 加持，法律条款自动适配。</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card magenta">
+        <div class="icon">◈</div>
+        <h4>AI 法律引擎</h4>
+        <p>Gemini 2.5 Flash 自动生成专业附加条款，覆盖特殊约定</p>
+      </div>
+      <div class="feature-card magenta">
+        <div class="icon">▤</div>
+        <h4>分步录入表单</h4>
+        <p>屋主、租客、物业信息分步填写，中英双语，手机完成</p>
+      </div>
+      <div class="feature-card magenta">
+        <div class="icon">◎</div>
+        <h4>一键 Stamping</h4>
+        <p>合同生成后直接提交盖章，后台处理，电子交付</p>
+      </div>
+      <div class="feature-card magenta">
+        <div class="icon">☰</div>
+        <h4>自动存证备份</h4>
+        <p>所有合同 PDF 自动归档，随时查看下载</p>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step">
+        <div class="num">01</div>
+        <div>
+          <h4>打开 Telegram Bot</h4>
+          <p>搜索 @smarttenancy_bot，点击 START 进入</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <div>
+          <h4>填写租约信息</h4>
+          <p>按步骤录入屋主、租客、物业、租金、押金等</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <div>
+          <h4>AI 增强条款 & 预览</h4>
+          <p>AI 自动补充特殊条款，预览确认无误</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <div>
+          <h4>支付 → 生成 PDF → 提交 Stamping</h4>
+          <p>线上支付后立即生成合同，一键提交盖章</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-cta">
+      <div class="icon">⬡</div>
+      <h4>Telegram 打开即用</h4>
+      <p>无需下载 App，无需注册账号。打开 Telegram 搜 @smarttenancy_bot 马上开始。</p>
+      <a href="https://t.me/smarttenancy_bot" class="btn-tg" target="_blank">⬡ 打开 Telegram Bot</a>
+    </div>
+
+    <div class="cross-promo" style="margin-top:20px;border-color:rgba(0,240,255,0.3);">
+      <p>🔍 还没找到房源？试试 <a href="#radar" style="color:var(--neon-cyan);text-shadow:0 0 6px rgba(0,240,255,0.3);">市场雷达 ↑</a> 自动抓 JB 租房数据</p>
+    </div>
+  </div>
+</section>
+
+<div class="neon-divider"></div>
+
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section class="faq">
+  <div class="container">
+    <h2>[ FAQ ]</h2>
+    <div class="faq-item">
+      <h4>两个产品是分开的吗？</h4>
+      <p>是。市场雷达和智能合同是两个独立产品，各自付费各自用，不捆绑。</p>
+    </div>
+    <div class="faq-item">
+      <h4>市场雷达的数据多久更新？</h4>
+      <p>每 30 分钟自动扫描一次，新帖子最快半小时进入表格。</p>
+    </div>
+    <div class="faq-item">
+      <h4>智能合同有试用吗？</h4>
+      <p>有。打开 @smarttenancy_bot 可以免费预览合同效果，确认满意再付费生成 PDF。</p>
+    </div>
+    <div class="faq-item">
+      <h4>可以只用一个产品吗？</h4>
+      <p>完全可以。选你需要的，用得好再加另一个。</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    ◈ Smart Tenancy Pro ◈ 专为 Johor Bahru Property Agent 打造 ◈
+    <a href="https://t.me/smarttenancy_bot">@smarttenancy_bot</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+node_modules/
+subscribers.db
+*.pyc
+__pycache__/
+.hermes/
+*.log
+.env
