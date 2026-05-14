@@ -121,10 +121,13 @@ Cron 每 30 分钟跑 `scripts/export_rentals_json.py` → git push。
 GitHub Pages 自动部署 → `https://reinocheong.github.io/jb-rental-intel/rentals.html` 总是最新数据。
 
 ### 页面特性
-- 手机端卡片式布局，纯上下滑动
-- 顶栏粘性搜索（支持楼盘名/agent/户型模糊搜索）
-- 快速筛选：全部/出租/出售/有电话
-- 电话号码一键 WhatsApp 跳转
+- 手机端卡片式布局，纯上下滑动，零横向滚动
+- 关键词搜索（楼盘名/agent/备注/帖文全文）
+- 类型筛选：出租 / 出售
+- 房型筛选：公寓/排屋/房间/Studio 等（按数量排序）
+- 电话号码完整显示，点击可拨打
+- Post Text 点击展开/收起（默认截断~100字）
+- FB 原帖直达链接
 - 深色主题，与 architecture.html 风格一致
 
 ---
@@ -141,6 +144,7 @@ GitHub Pages 自动部署 → `https://reinocheong.github.io/jb-rental-intel/ren
 | 每天 12:30 | `python3 outreach/outreach_engine.py --send --slot 3 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段③（1人） |
 | 每天 13:30 | `python3 outreach/outreach_engine.py --send --slot 4 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段④（1人） |
 | 每天 14:30 | `python3 outreach/outreach_engine.py --send --slot 5 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段⑤（1人） |
+| 每 30 分钟 | 导出房源 JSON → git push | `/home/user/jb-rental-intel` | 📋 房源浏览页数据刷新 |
 | 每 5 分钟 | `python3 sub_mgr.py form-process` | `/home/user/jb-rental-intel` | ④ 新注册 → 自动开试用 |
 | 每天 9:00 | `python3 sub_mgr.py remind` | `/home/user/jb-rental-intel` | ④ 试用到期提醒 |
 | 每天 0:00 | `python3 sub_mgr.py check` | `/home/user/jb-rental-intel` | ④ 到期回收权限 |
