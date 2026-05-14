@@ -160,10 +160,10 @@
     <div class="chip-row" id="filter-listing-type"></div>
   </div>
 
-  <!-- Property Type Filter -->
+  <!-- Property Name Filter -->
   <div class="filter-section">
-    <div class="filter-label">房型</div>
-    <div class="chip-row" id="filter-property-type"></div>
+    <div class="filter-label">楼盘</div>
+    <div class="chip-row" id="filter-property-name"></div>
   </div>
 
   <!-- Results -->
@@ -178,9 +178,7 @@
 <script>
   let ALL = [];
   let activeListingType = null;
-  let activePropertyType = null;
-
-  const TOP_PROPERTY_TYPES = ['公寓','排屋','双层排屋','单层排屋','房间','Studio','Flat','中房','大房','小房'];
+  let activePropertyName = null;
 
   // ── Load JSON ──
   (async () => {
@@ -216,22 +214,17 @@
       lt.appendChild(c);
     });
 
-    // Property Type chips — only count top types
-    const pt = document.getElementById('filter-property-type');
+    // Property Name chips — count + show top by frequency
+    const pn = document.getElementById('filter-property-name');
     const counts = {};
     ALL.forEach(l => {
-      const v = l['Property Type'] || '其它';
-      counts[v] = (counts[v] || 0) + 1;
+      const v = (l['Property Name'] || '').trim();
+      if (v) counts[v] = (counts[v] || 0) + 1;
     });
 
-    const top = ['全部'];
-    TOP_PROPERTY_TYPES.forEach(t => { if (counts[t]) top.push(t); });
-    // add remaining sorted
-    const rest = Object.entries(counts)
-      .filter(([k]) => !TOP_PROPERTY_TYPES.includes(k))
-      .sort((a,b) => b[1]-a[1])
-      .map(([k]) => k);
-    top.push(...rest.slice(0, 10)); // max ~20 total chips
+    // sort by count desc, take top 20
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 20);
+    const top = ['全部', ...sorted.map(([k]) => k)];
 
     top.forEach(t => {
       const c = document.createElement('span');
@@ -239,12 +232,12 @@
       const cnt = t === '全部' ? ALL.length : (counts[t]||0);
       c.textContent = t + ' ' + cnt;
       c.onclick = () => {
-        pt.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
+        pn.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
         c.classList.add('active');
-        activePropertyType = t === '全部' ? null : t;
+        activePropertyName = t === '全部' ? null : t;
         render();
       };
-      pt.appendChild(c);
+      pn.appendChild(c);
     });
   }
 
@@ -256,8 +249,8 @@
     if (activeListingType) {
       filtered = filtered.filter(l => l['Listing Type'] === activeListingType);
     }
-    if (activePropertyType) {
-      filtered = filtered.filter(l => (l['Property Type'] || '其它') === activePropertyType);
+    if (activePropertyName) {
+      filtered = filtered.filter(l => (l['Property Name'] || '').trim() === activePropertyName);
     }
     if (q) {
       filtered = filtered.filter(l => {
