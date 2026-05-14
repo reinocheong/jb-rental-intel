@@ -1,74 +1,75 @@
 #!/usr/bin/env python3
 """
-导出 JB Rentals Sheet → JSON，供 rentals.html 读取。
-只读不写，不碰 Sheet。
+export_rentals_json.py
+读取 JB Rentals Sheet → 导出为 data/rentals.json
+纯读取，零修改。供 rentals.html 前端使用。
 """
-import json, os, sys
-from datetime import datetime, timezone
+import json, sys, os
+from pathlib import Path
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
 
-SYS_PYTHON = "/home/user/.hermes/hermes-agent/venv/bin/python3"
-SA_KEY = "/home/user/.hermes/google_sa_rental.json"
+PROJECT_ROOT = Path("/home/user/jb-rental-intel")
+SA_KEY = Path("/home/user/.hermes/google_sa_rental.json")
 SHEET_ID = "1QgWjlUEvFf9auZzptbYI2EEDAeWnKAZcxsXhcCgjJYM"
-RANGE = "JB Rentals!A:L"
-OUTPUT = "/home/user/jb-rental-intel/data/rentals.json"
+TAB = "JB Rentals"
+OUTPUT = PROJECT_ROOT / "data" / "rentals.json"
 
-# 列映射
-COL_MAP = [
-    "agent",       # A
-    "property",    # B
-    "listing_type",# C
-    "property_type",#D
-    "rooms",       # E
-    "furnishing",  # F
-    "rent",        # G
-    "phone",       # H
-    "link",        # I
-    "remark",      # J
-    "scraped_at",  # K
-    "post_text",   # L
-]
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 def main():
-    from google.oauth2.service_account import Credentials
-    from googleapiclient.discovery import build
-
-    creds = Credentials.from_service_account_file(
-        SA_KEY, scopes=["https://www.googleapis.com/auth/spreadsheets"]
-    )
+    creds = Credentials.from_service_account_file(str(SA_KEY), scopes=SCOPES)
     svc = build("sheets", "v4", credentials=creds)
 
-    r = svc.spreadsheets().values().get(
+    # 读取全部数据
+    result = svc.spreadsheets().values().get(
         spreadsheetId=SHEET_ID,
-        range=RANGE,
+        range=f"'{TAB}'!A:L"
     ).execute()
-    rows = r.get("values", [])
+    rows = result.get("values", [])
 
-    if not rows or len(rows) < 2:
-        print("No data rows found")
-        payload = {"listings": [], "updated": datetime.now(timezone.utc).isoformat(), "total": 0}
-    else:
-        header = rows[0]
-        data_rows = rows[1:]
-        listings = []
-        for row in data_rows:
-            listing = {}
-            for i, key in enumerate(COL_MAP):
-                listing[key] = row[i] if i < len(row) else ""
-            # 跳过完全空行
-            if any(v.strip() for v in listing.values() if v):
-                listings.append(listing)
+    if len(rows) < 2:
+        print("⚠️  Sheet 数据不足（只有表头或无数据）")
+        sys.exit(1)
 
-        payload = {
-            "listings": listings,
+    headers = rows[0]
+    data_rows = rows[1:]
+
+    # 前端需要的字段（排除 Post Text，体积太大对浏览无意义）
+    FRONTEND_FIELDS = [
+        "Agent Name", "Property Name", "Listing Type", "Property Type",
+        "Rooms", "Furnishing", "Rent (RM)", "Phone",
+        "Link", "Remark", "Scraped At"
+    ]
+
+    listings = []
+    for row in data_rows:
+        entry = {}
+        has_value = False
+        for i, h in enumerate(headers):
+            val = row[i].strip() if i < len(row) and row[i] else ""
+            if h in FRONTEND_FIELDS:
+                entry[h] = val
+                if val:
+                    has_value = True
+        # 跳过完全空行
+        if has_value:
+            listings.append(entry)
+
+    # 统计
+    print(f"✅ 读取 {len(data_rows)} 行 → {len(listings)} 条有效房源")
+
+    # 写 JSON（无缩进，最小体积）
+    os.makedirs(OUTPUT.parent, exist_ok=True)
+    with open(OUTPUT, "w", encoding="utf-8") as f:
+        from datetime import datetime
+        json.dump({
+            "updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "total": len(listings),
-            "updated": datetime.now(timezone.utc).isoformat(),
-        }
+            "listings": listings,
+        }, f, ensure_ascii=False, separators=(",", ":"))
 
-    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
-    with open(OUTPUT, "w") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-
-    print(f"✅ {len(payload['listings'])} listings → {OUTPUT}")
+    print(f"📦 已导出 → {OUTPUT} ({OUTPUT.stat().st_size} bytes)")
 
 if __name__ == "__main__":
     main()
