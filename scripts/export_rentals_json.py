@@ -1,66 +1,134 @@
 #!/usr/bin/env python3
 """
-export_rentals_json.py
-读取 JB Rentals Sheet → 导出为 data/rentals.json
-纯读取，零修改。供 rentals.html 前端使用。
+Export JB Rentals Sheet to JSON for rentals.html viewer.
+Read-only — never writes to Sheets.
 """
-import json, sys, os
-from pathlib import Path
-from datetime import datetime
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
+import json, os, sys
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
+from collections import Counter
 
-PROJECT_ROOT = Path("/home/user/jb-rental-intel")
-SA_KEY = Path("/home/user/.hermes/google_sa_rental.json")
-SHEET_ID = "1QgWjlUEvFf9auZzptbYI2EEDAeWnKAZcxsXhcCgjJYM"
-TAB = "JB Rentals"
-OUTPUT = PROJECT_ROOT / "data" / "rentals.json"
+MY_TZ = ZoneInfo("Asia/Kuala_Lumpur")
+PROJECT_ROOT = "/home/user/jb-rental-intel"
+SA_KEY = "/home/user/.hermes/google_sa_rental.json"
+JB_SHEET_ID = "1QgWjlUEvFf9auZzptbYI2EEDAeWnKAZcxsXhcCgjJYM"
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+def get_sheets_service():
+    from google.oauth2.service_account import Credentials
+    from googleapiclient.discovery import build
+    creds = Credentials.from_service_account_file(SA_KEY, scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"])
+    return build("sheets", "v4", credentials=creds)
+
+def mask_phone(phone: str) -> str:
+    """Mask middle digits: +60123456789 -> +6012***789"""
+    p = phone.strip()
+    if not p:
+        return ""
+    if p.startswith("+"):
+        digits = p[1:]
+        prefix = "+"
+    else:
+        digits = p
+        prefix = ""
+    if len(digits) < 7:
+        return p
+    return f"{prefix}{digits[:4]}***{digits[-3:]}"
+
+def parse_rent(rent_str: str) -> str:
+    """Clean rent: 'RM2200' or '2200' -> '2200'"""
+    if not rent_str:
+        return ""
+    r = rent_str.strip().lower().replace("rm", "").replace(".00", "").strip()
+    return r
 
 def main():
-    creds = Credentials.from_service_account_file(str(SA_KEY), scopes=SCOPES)
-    svc = build("sheets", "v4", credentials=creds)
+    svc = get_sheets_service()
+    now = datetime.now(MY_TZ)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # 读取全部数据（A-L 共12列）
-    result = svc.spreadsheets().values().get(
-        spreadsheetId=SHEET_ID,
-        range=f"'{TAB}'!A:L"
+    # Read all rows
+    resp = svc.spreadsheets().values().get(
+        spreadsheetId=JB_SHEET_ID,
+        range="JB Rentals!A:L"
     ).execute()
-    rows = result.get("values", [])
-
+    rows = resp.get("values", [])
     if len(rows) < 2:
-        print("⚠️  Sheet 数据不足（只有表头或无数据）")
+        print("No data rows found")
         sys.exit(1)
 
-    headers = rows[0]
-    data_rows = rows[1:]
+    headers = [h.strip().lower() for h in rows[0]]
+    # Map: Agent Name | Property Name | Listing Type | Property Type | Rooms |
+    #       Furnishing | Rent (RM) | Phone | Link | Remark | Scraped At | Post Text
 
-    # 全部12列都导出：Agent Name, Property Name, Listing Type, Property Type,
-    #   Rooms, Furnishing, Rent (RM), Phone, Link, Remark, Scraped At, Post Text
     listings = []
-    for row in data_rows:
-        entry = {}
-        has_value = False
-        for i, h in enumerate(headers):
-            val = row[i].strip() if i < len(row) and row[i] else ""
-            entry[h] = val
-            if val:
-                has_value = True
-        if has_value:
-            listings.append(entry)
+    today_new = 0
+    prop_counter = Counter()
 
-    print(f"✅ 读取 {len(data_rows)} 行 → {len(listings)} 条有效房源")
+    for row in rows[1:]:
+        # pad row to header length
+        r = row + [""] * (len(headers) - len(row))
+        d = dict(zip(headers, r))
 
-    os.makedirs(OUTPUT.parent, exist_ok=True)
-    with open(OUTPUT, "w", encoding="utf-8") as f:
-        json.dump({
-            "updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "total": len(listings),
-            "listings": listings,
-        }, f, ensure_ascii=False, separators=(",", ":"))
+        phone = d.get("phone", "").strip()
+        if not phone or len(phone) < 7:
+            continue
 
-    print(f"📦 已导出 → {OUTPUT} ({OUTPUT.stat().st_size:,} bytes)")
+        scraped = d.get("scraped at", "").strip()
+        try:
+            scraped_dt = datetime.fromisoformat(scraped)
+            if scraped_dt >= today_start:
+                today_new += 1
+        except:
+            pass
+
+        prop = d.get("property name", "").strip()
+        if prop:
+            prop_counter[prop] += 1
+
+        rent_raw = d.get("rent (rm)", "").strip()
+        rent = parse_rent(rent_raw)
+        if rent:
+            try:
+                rent = f"{int(rent):,}"
+            except:
+                pass
+
+        listings.append({
+            "agent": d.get("agent name", "").strip(),
+            "property": prop,
+            "type": d.get("listing type", "").strip(),
+            "property_type": d.get("property type", "").strip(),
+            "rooms": d.get("rooms", "").strip(),
+            "furnishing": d.get("furnishing", "").strip(),
+            "rent": rent,
+            "phone": phone,
+            "link": d.get("link", "").strip(),
+            "remark": d.get("remark", "").strip(),
+            "scraped_at": scraped,
+            "post_text": d.get("post text", "").strip(),
+        })
+
+    # Sort newest first
+    listings.sort(key=lambda x: x["scraped_at"], reverse=True)
+
+    # Top properties
+    top_props = [p for p, _ in prop_counter.most_common(10)]
+
+    output = {
+        "updated_at": now.isoformat(),
+        "total": len(listings),
+        "today_new": today_new,
+        "top_properties": top_props,
+        "listings": listings,
+    }
+
+    os.makedirs(os.path.join(PROJECT_ROOT, "data"), exist_ok=True)
+    out_path = os.path.join(PROJECT_ROOT, "data", "rentals.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+
+    print(f"✅ 导出完成: {len(listings)} 条 ({today_new} 今日新), top: {top_props[:5]}")
+    print(f"   → {out_path}")
 
 if __name__ == "__main__":
     main()
