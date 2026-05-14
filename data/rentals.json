@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-05-15T04:36:50.890691+08:00",
-  "total": 435,
+  "updated_at": "2026-05-15T05:07:59.262853+08:00",
+  "total": 436,
   "today_new": 0,
   "top_properties": [
     "Pelangi",
@@ -15,6 +15,20 @@
     "Taman Puteri Wangsa"
   ],
   "listings": [
+    {
+      "agent": "Stella Loo",
+      "property": "",
+      "type": "出租",
+      "property_type": "排屋",
+      "rooms": "",
+      "furnishing": "全家私",
+      "rent": "2,600",
+      "phone": "0167211080",
+      "link": "https://www.facebook.com/groups/1313487628797877/posts/4417085155104760",
+      "remark": "[Group2] 有冷气",
+      "scraped_at": "2026-05-15 05:01:26",
+      "post_text": "Stella Loo *For Rent* Pulai Mutiara @ Acacia81300 Johor Bahru, Johor- 2.5 Storey Terrace House- Land Size 18 x 65- 4 Bedrooms & 3 Bathrooms- Facing North- Intermediate Unit- ⁠Fully Furnished- Renovated Condition- ⁠24hours Gated Guarded - 2 Aircond & 2 Water Heater - Washing Machine & Fridge - 3 Mattress Wardrobe Set- Asking Rental RM 2,600Jb Property Stella Loo0167211080TRR MFG"
+    },
     {
       "agent": "Bryan",
       "property": "Season Larkin Apartment",
