@@ -2,218 +2,300 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>JB Rentals — 房源速览</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>JB Rentals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #020617;
+      --card-bg: rgba(15,23,42,0.7);
+      --border: rgba(255,255,255,0.06);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245,158,11,0.15);
+      --green: #34d399;
+      --cyan: #22d3ee;
+      --new-bg: rgba(52,211,153,0.12);
+      --new-text: #34d399;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: 'Noto Sans SC', -apple-system, sans-serif;
-      background: #020617;
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
       min-height: 100vh;
-      color: white;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: env(safe-area-inset-bottom, 0.5rem);
     }
 
-    /* Header */
-    .header {
-      background: #020617;
-      padding: 0.85rem;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    /* ── Header ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(2,6,23,0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem 0;
     }
-    .header-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
-    .pulse-dot { width: 8px; height: 8px; flex-shrink: 0; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .header h1 { font-size: 1rem; font-weight: 700; }
-    .header .stats { color: #94a3b8; font-size: 0.68rem; margin-top: 0.15rem; }
+    .top-bar-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.55rem;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .brand-dot {
+      width: 9px; height: 9px; flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(52,211,153,0.5);
+      animation: breathe 2.5s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.2)} }
+    .brand h1 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+    .brand-sub { font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
 
-    /* Sticky bar */
-    .sticky-bar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: #020617;
-      padding: 0 0.85rem 0.5rem;
-    }
-    .search-box {
-      width: 100%;
-      padding: 0.5rem 0.6rem;
-      border-radius: 0.5rem;
-      border: 1px solid #1e293b;
-      background: rgba(15,23,42,0.7);
-      color: white;
-      font-size: 0.8rem;
-      outline: none;
-      margin-bottom: 0.4rem;
-    }
-    .search-box::placeholder { color: #475569; }
-    .search-box:focus { border-color: #34d399; }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      gap: 0.35rem;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 0.2rem;
-    }
-    .tag {
-      flex-shrink: 0;
-      padding: 0.25rem 0.55rem;
-      border-radius: 0.35rem;
-      font-size: 0.68rem;
-      cursor: pointer;
-      border: 1px solid #1e293b;
-      background: rgba(30,41,59,0.5);
-      color: #94a3b8;
+    .stat-pills { display: flex; gap: 0.4rem; }
+    .stat-pill {
+      font-size: 0.62rem; font-weight: 500;
+      padding: 0.2rem 0.5rem; border-radius: 1rem;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
       white-space: nowrap;
     }
-    .tag.active {
-      background: rgba(52, 211, 153, 0.12);
-      border-color: #34d399;
-      color: #34d399;
-    }
+    .stat-pill b { color: var(--text-secondary); font-weight: 600; }
 
-    /* Cards */
-    .listings {
-      padding: 0 0.85rem 1rem;
-    }
-    .card {
-      background: rgba(15,23,42,0.5);
-      border-radius: 0.6rem;
-      border: 1px solid #1e293b;
-      padding: 0.7rem;
+    /* Search */
+    .search-wrap {
+      position: relative;
       margin-bottom: 0.5rem;
     }
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.35rem;
+    .search-wrap svg {
+      position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: var(--text-muted); pointer-events: none;
     }
-    .card-prop {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #e2e8f0;
-      line-height: 1.3;
+    .search-input {
+      width: 100%;
+      padding: 0.55rem 0.75rem 0.55rem 2.35rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
     }
-    .card-rent {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #fbbf24;
-      flex-shrink: 0;
-      margin-left: 0.5rem;
-    }
-
-    .card-details {
-      font-size: 0.72rem;
-      color: #94a3b8;
-      line-height: 1.6;
-    }
-    .card-details .field {
-      display: inline;
-      margin-right: 0.5rem;
-    }
-    .card-details .field:empty { display: none; }
-
-    .card-agent {
-      font-size: 0.72rem;
-      color: #cbd5e1;
-      margin-top: 0.3rem;
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus {
+      border-color: rgba(245,158,11,0.3);
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
-    .card-post {
-      margin-top: 0.4rem;
-      padding: 0.4rem 0.5rem;
-      border-radius: 0.35rem;
-      background: rgba(30,41,59,0.4);
-      border-left: 2px solid #1e293b;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      line-height: 1.5;
-      cursor: pointer;
-      white-space: pre-line;
-      word-break: break-word;
+    /* Tags — wrap, no scroll */
+    .tag-row {
+      display: flex; flex-wrap: wrap;
+      gap: 0.35rem;
+      padding-bottom: 0.65rem;
     }
-    .card-post.collapsed {
-      max-height: 4.5em;
+    .tag {
+      padding: 0.28rem 0.6rem;
+      border-radius: 0.45rem;
+      font-size: 0.67rem; font-weight: 500;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .tag.active {
+      background: var(--accent-glow);
+      border-color: rgba(245,158,11,0.3);
+      color: var(--accent);
+    }
+
+    /* ── Listings ── */
+    .listings { padding: 0.5rem 0.85rem; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      margin-bottom: 0.6rem;
       overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
     }
-    .card-post.collapsed::after {
-      content: "展开全文 ↓";
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: linear-gradient(to left, rgba(15,23,42,0.95) 60%, transparent);
-      padding: 0.1rem 0.5rem 0.1rem 2rem;
-      color: #34d399;
-      font-size: 0.65rem;
-    }
-    .card-post.expanded::after {
-      content: "收起 ↑";
-      display: block;
-      text-align: center;
-      color: #34d399;
-      font-size: 0.65rem;
-      margin-top: 0.3rem;
-    }
-    .card-post.short::after { content: none; }
+    .card:active { transform: scale(0.985); }
 
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.45rem;
-      font-size: 0.65rem;
+    /* Type accent bar */
+    .card.accent-condo  { border-left: 3px solid #f59e0b; }
+    .card.accent-landed { border-left: 3px solid #34d399; }
+    .card.accent-room   { border-left: 3px solid #38bdf8; }
+    .card.accent-default { border-left: 3px solid #6366f1; }
+
+    .card-body { padding: 0.7rem 0.75rem; }
+
+    /* New badge */
+    .badge-new {
+      display: inline-block;
+      font-size: 0.58rem; font-weight: 600; letter-spacing: 0.03em;
+      padding: 0.12rem 0.4rem; border-radius: 0.25rem;
+      background: var(--new-bg); color: var(--new-text);
+      margin-right: 0.4rem; vertical-align: middle;
     }
-    .card-time { color: #475569; }
-    .card-link { color: #22d3ee; text-decoration: none; }
-    .card-link:hover { text-decoration: underline; }
+
+    .card-name {
+      font-size: 0.92rem; font-weight: 600;
+      line-height: 1.35; margin-bottom: 0.35rem;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .card-name .rent-tag {
+      flex-shrink: 0;
+      font-size: 0.75rem; font-weight: 700;
+      color: #fbbf24;
+      background: rgba(251,191,36,0.08);
+      padding: 0.15rem 0.45rem; border-radius: 0.35rem;
+      margin-left: auto;
+    }
+
+    /* Info chips */
+    .info-chips {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      margin-bottom: 0.4rem;
+    }
+    .chip {
+      font-size: 0.65rem; font-weight: 500;
+      padding: 0.18rem 0.45rem; border-radius: 0.3rem;
+      background: rgba(255,255,255,0.04);
+      color: #cbd5e1;
+    }
+    .chip.type-chip { background: rgba(99,102,241,0.1); color: #a5b4fc; }
+    .chip.furnish-chip { background: rgba(52,211,153,0.08); color: #6ee7b7; }
+
+    /* Agent row */
+    .agent-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; color: var(--text-secondary);
+      margin-bottom: 0.35rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.4rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .agent-avatar {
+      width: 22px; height: 22px; flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.58rem; font-weight: 600; color: white;
+    }
+    .agent-phone {
+      color: var(--cyan); font-weight: 500; margin-left: auto;
+      text-decoration: none;
+      font-size: 0.68rem;
+    }
+
+    /* Post preview */
+    .post-block {
+      margin-top: 0.3rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.4rem;
+      background: rgba(0,0,0,0.25);
+      font-size: 0.68rem; color: var(--text-muted);
+      line-height: 1.55;
+      position: relative;
+      white-space: pre-line; word-break: break-word;
+    }
+    .post-block.collapsed {
+      max-height: 4em; overflow: hidden;
+    }
+    .post-block.collapsed::after {
+      content: '展开全文';
+      position: absolute; bottom: 0; right: 0;
+      padding: 0.8em 0.5rem 0.2rem 3rem;
+      background: linear-gradient(to left, rgba(15,23,42,0.95) 50%, transparent);
+      color: var(--cyan); font-size: 0.62rem; font-weight: 500;
+    }
+    .post-block.expanded::after {
+      content: '收起';
+      display: block; text-align: center;
+      color: var(--cyan); font-size: 0.62rem; font-weight: 500;
+      margin-top: 0.35rem; padding-top: 0.25rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Card footer */
+    .card-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 0.4rem; padding-top: 0.35rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.6rem;
+    }
+    .card-foot .time { color: var(--text-muted); }
+    .card-foot .fb-link {
+      color: var(--cyan); text-decoration: none; font-weight: 500;
+      display: flex; align-items: center; gap: 0.2rem;
+    }
+
+    /* Skeleton */
+    .skeleton {
+      background: var(--card-bg);
+      border-radius: 0.75rem; border: 1px solid var(--border);
+      margin-bottom: 0.6rem; padding: 0.7rem 0.75rem;
+    }
+    .sk-line {
+      height: 0.7rem; border-radius: 0.25rem; margin-bottom: 0.45rem;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .sk-line.w2 { width: 60%; }
+    .sk-line.w3 { width: 80%; }
 
     /* Empty */
-    .empty {
-      text-align: center;
-      padding: 2rem;
-      color: #475569;
-      font-size: 0.8rem;
-    }
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.8rem; }
 
-    .footer {
-      text-align: center;
-      padding: 0.75rem;
-      color: #334155;
-      font-size: 0.65rem;
+    .footnote {
+      text-align: center; padding: 1.5rem 0.5rem 1rem;
+      font-size: 0.6rem; color: #334155;
     }
   </style>
 </head>
 <body>
 
-<div class="sticky-bar">
-  <div class="header" style="padding:0.5rem 0 0.3rem;">
-    <div class="header-row">
-      <div class="pulse-dot"></div>
-      <h1>JB Rentals 房源速览</h1>
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div>
+        <h1>JB Rentals</h1>
+        <div class="brand-sub">Smart Tenancy Pro</div>
+      </div>
     </div>
-    <div class="stats" id="stats">加载中…</div>
+    <div class="stat-pills" id="statPills"></div>
   </div>
-  <input class="search-box" type="text" placeholder="🔍 搜楼盘 / Agent / 房型 / 备注" oninput="filter()" id="search">
-
-  <div class="tag-row" id="tagRow">
-    <span class="tag active" onclick="selectTag('')">全部</span>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="search-input" type="text" placeholder="搜楼盘 / agent / 房型 / 备注…" oninput="filter()" id="search">
   </div>
+  <div class="tag-row" id="tagRow"></div>
 </div>
 
-<div class="listings" id="listings"></div>
-<div class="empty" id="empty" style="display:none">没有匹配的房源</div>
+<div class="listings" id="listings">
+  <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
+  <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
+  <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
+</div>
 
-<p class="footer">Smart Tenancy Pro · 数据每 30 分钟更新</p>
+<p class="footnote">每 30 分钟自动更新 · 数据只读不写 Sheets</p>
 
 <script>
 let DATA = { total: 0, today_new: 0, listings: [], top_properties: [] };
 let activeTag = '';
-let searchText = '';
 
 async function load() {
   try {
@@ -223,8 +305,7 @@ async function load() {
     renderTags();
     filter();
   } catch(e) {
-    document.getElementById('stats').textContent = '⚠️ 数据加载失败';
-    document.getElementById('listings').innerHTML = '<div class="empty">无法加载房源数据</div>';
+    document.getElementById('listings').innerHTML = '<div class="empty">⚠ 数据加载失败，请刷新重试</div>';
   }
 }
 
@@ -232,40 +313,41 @@ function renderStats() {
   const t = new Date(DATA.updated_at);
   const now = new Date();
   const min = Math.floor((now - t) / 60000);
-  let ago = min < 1 ? '刚刚' : min < 60 ? min + ' 分钟前' : Math.floor(min/60) + ' 小时前';
-  document.getElementById('stats').textContent =
-    `共 ${DATA.total} 套房源 · 今日新增 ${DATA.today_new} 套 · 更新于 ${ago}`;
+  let ago = min < 1 ? '刚刚' : min < 60 ? min + '分前' : Math.floor(min/60) + '时前';
+  document.getElementById('statPills').innerHTML =
+    `<span class="stat-pill"><b>${DATA.total}</b> 套房源</span>` +
+    `<span class="stat-pill">🆕 <b>${DATA.today_new}</b> 今日</span>` +
+    `<span class="stat-pill">${ago}</span>`;
 }
 
 function renderTags() {
   const row = document.getElementById('tagRow');
-  row.innerHTML = '<span class="tag active" onclick="selectTag(\'\')">全部</span>';
-  DATA.top_properties.slice(0, 8).forEach(p => {
-    const span = document.createElement('span');
-    span.className = 'tag';
-    span.textContent = p;
-    span.onclick = () => selectTag(p);
-    row.appendChild(span);
+  row.innerHTML = '<span class="tag active" onclick="selectTag(\'\', this)">全部</span>';
+  DATA.top_properties.slice(0, 10).forEach(p => {
+    const s = document.createElement('span');
+    s.className = 'tag';
+    s.textContent = p;
+    s.onclick = () => selectTag(p, s);
+    row.appendChild(s);
   });
 }
 
-function selectTag(tag) {
-  activeTag = activeTag === tag ? '' : tag;
-  document.querySelectorAll('.tag').forEach(t => {
-    t.classList.toggle('active', t.textContent === (activeTag || '全部'));
-  });
+function selectTag(tag, el) {
+  if (activeTag === tag) { activeTag = ''; } else { activeTag = tag; }
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  if (activeTag) el?.classList.add('active');
+  else document.querySelector('.tag').classList.add('active');
   filter();
 }
 
 function filter() {
-  searchText = document.getElementById('search').value.toLowerCase().trim();
-  renderListings();
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  renderListings(q);
 }
 
 function timeAgo(ts) {
   if (!ts) return '';
-  const d = new Date(ts);
-  const now = new Date();
+  const d = new Date(ts), now = new Date();
   const min = Math.floor((now - d) / 60000);
   if (min < 1) return '刚刚';
   if (min < 60) return min + ' 分钟前';
@@ -275,71 +357,99 @@ function timeAgo(ts) {
 
 function fmtRent(r) {
   if (!r) return '';
-  // try to format as RM
-  const n = parseInt(String(r).replace(/,/g,''));
-  if (isNaN(n)) return r;
-  if (n >= 1000) return 'RM ' + (n/1000).toFixed(1).replace(/\.0$/,'') + 'k';
-  return 'RM ' + n;
+  const n = parseInt(String(r).replace(/[^0-9]/g, ''));
+  if (isNaN(n)) return '';
+  if (n >= 1000) return 'RM' + (n/1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return 'RM' + n;
 }
 
-function renderListings() {
+function isToday(ts) {
+  if (!ts) return false;
+  const d = new Date(ts), now = new Date();
+  return d.toDateString() === now.toDateString();
+}
+
+function accentClass(type) {
+  if (!type) return 'accent-default';
+  const t = type.toLowerCase();
+  if (t.includes('condo') || t.includes('apartment') || t.includes('studio')) return 'accent-condo';
+  if (t.includes('landed') || t.includes('terrace') || t.includes('bungalow') || t.includes('semi')) return 'accent-landed';
+  if (t.includes('room')) return 'accent-room';
+  return 'accent-default';
+}
+
+function renderListings(q) {
   let items = DATA.listings;
-  if (activeTag) {
-    items = items.filter(l => (l.property || '').includes(activeTag));
-  }
-  if (searchText) {
+  if (activeTag) items = items.filter(l => (l.property || '').includes(activeTag));
+  if (q) {
     items = items.filter(l => {
-      const blob = [l.property, l.agent, l.property_type, l.remark, l.type, l.furnishing].join('|').toLowerCase();
-      return blob.includes(searchText);
+      const blob = [l.property, l.agent, l.property_type, l.type, l.remark, l.furnishing].join('|').toLowerCase();
+      return blob.includes(q);
     });
   }
 
+  if (!items.length) {
+    document.getElementById('listings').innerHTML = '<div class="empty">没有匹配的房源</div>';
+    return;
+  }
+
   const html = items.map(l => {
-    const postLen = (l.post_text || '').length;
-    const shortPost = postLen <= 80;
+    const isNew = isToday(l.scraped_at);
+    const postText = l.post_text || '';
+    const short = postText.length <= 80;
+    let postCls = short ? '' : 'collapsed';
+    let postClick = short ? '' : ' onclick="togglePost(this)"';
 
-    // build details line — only show non-empty fields
-    let detailParts = [];
-    if (l.type) detailParts.push(l.type);
-    if (l.property_type) detailParts.push(l.property_type);
-    if (l.rooms) detailParts.push(l.rooms);
-    if (l.furnishing) detailParts.push(l.furnishing);
-    if (l.remark) detailParts.push(l.remark);
-    const detailLine = detailParts.join(' · ');
+    // Chips
+    let chips = [];
+    if (l.type) chips.push(`<span class="chip type-chip">${esc(l.type)}</span>`);
+    if (l.property_type) chips.push(`<span class="chip">${esc(l.property_type)}</span>`);
+    if (l.rooms) chips.push(`<span class="chip">${esc(l.rooms)}</span>`);
+    if (l.furnishing) chips.push(`<span class="chip furnish-chip">${esc(l.furnishing)}</span>`);
+    if (l.remark) chips.push(`<span class="chip">${esc(l.remark)}</span>`);
 
-    // agent + phone
-    let agentLine = [];
-    if (l.agent) agentLine.push('Agent: ' + l.agent);
-    if (l.phone) agentLine.push('📱 ' + l.phone);
-    const agentStr = agentLine.join('  ');
-
-    // post text
-    let postHtml = '';
-    if (l.post_text) {
-      let cls = shortPost ? 'card-post short' : 'card-post collapsed';
-      let onclick = shortPost ? '' : ' onclick="togglePost(this)"';
-      postHtml = `<div class="${cls}"${onclick}>${esc(l.post_text)}</div>`;
-    }
-
+    // Rent
     const rent = l.rent ? fmtRent(l.rent) : '';
 
+    // Agent
+    const initial = (l.agent || '?')[0];
+    let agentHtml = '';
+    if (l.agent || l.phone) {
+      agentHtml = '<div class="agent-row">' +
+        '<span class="agent-avatar">' + esc(initial) + '</span>' +
+        (l.agent ? '<span>' + esc(l.agent) + '</span>' : '') +
+        (l.phone ? '<a class="agent-phone" href="tel:' + esc(l.phone) + '">📞 ' + esc(l.phone) + '</a>' : '') +
+        '</div>';
+    }
+
+    // Post
+    let postHtml = '';
+    if (postText) {
+      postHtml = '<div class="post-block ' + postCls + '"' + postClick + '>' + esc(postText) + '</div>';
+    }
+
+    const accent = accentClass(l.property_type || l.type);
+
     return `
-      <div class="card">
-        <div class="card-top">
-          <span class="card-prop">${esc(l.property || '(未识别)')}</span>
-          ${rent ? '<span class="card-rent">' + esc(rent) + '</span>' : ''}
-        </div>
-        ${detailLine ? '<div class="card-details">' + esc(detailLine) + '</div>' : ''}
-        ${agentStr ? '<div class="card-agent">' + esc(agentStr) + '</div>' : ''}
-        ${postHtml}
-        <div class="card-footer">
-          <span class="card-time">${timeAgo(l.scraped_at)}</span>
-          ${l.link ? '<a class="card-link" href="' + esc(l.link) + '" target="_blank">FB 原帖 →</a>' : ''}
+      <div class="card ${accent}">
+        <div class="card-body">
+          <div class="card-name">
+            ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+            ${esc(l.property || '(未识别)')}
+            ${rent ? '<span class="rent-tag">' + esc(rent) + '</span>' : ''}
+          </div>
+          ${chips.length ? '<div class="info-chips">' + chips.join('') + '</div>' : ''}
+          ${agentHtml}
+          ${postHtml}
+          <div class="card-foot">
+            <span class="time">${timeAgo(l.scraped_at)}</span>
+            ${l.link ? '<a class="fb-link" href="' + esc(l.link) + '" target="_blank">FB 原文 ↗</a>' : '<span></span>'}
+          </div>
         </div>
       </div>`;
   }).join('');
 
-  document.getElementById('listings').innerHTML = html || '<div class="empty">没有匹配的房源</div>';
+  document.getElementById('listings').innerHTML = html;
 }
 
 function esc(s) {
@@ -350,11 +460,9 @@ function esc(s) {
 
 function togglePost(el) {
   if (el.classList.contains('collapsed')) {
-    el.classList.remove('collapsed');
-    el.classList.add('expanded');
+    el.classList.remove('collapsed'); el.classList.add('expanded');
   } else {
-    el.classList.remove('expanded');
-    el.classList.add('collapsed');
+    el.classList.remove('expanded'); el.classList.add('collapsed');
   }
 }
 
