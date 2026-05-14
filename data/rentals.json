@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-05-15T00:37:37.284740+08:00",
-  "total": 422,
+  "updated_at": "2026-05-15T01:06:38.497014+08:00",
+  "total": 423,
   "today_new": 0,
   "top_properties": [
     "Pelangi",
@@ -15,6 +15,20 @@
     "Taman Puteri Wangsa"
   ],
   "listings": [
+    {
+      "agent": "Nurauni Aqilah",
+      "property": "Forest City",
+      "type": "出租",
+      "property_type": "房间",
+      "rooms": "2房",
+      "furnishing": "全家私",
+      "rent": "1,250",
+      "phone": "01129996610, 601129996610, 60112999661",
+      "link": "https://www.facebook.com/groups/290627785937141/posts/1443044624028779",
+      "remark": "[Group5-租屋] 有停车位",
+      "scraped_at": "2026-05-15 01:02:21",
+      "post_text": "Nurauni Aqilah新秀贡献者 0:00 / 0:59+6Nurauni Aqilah · 分享对象： 公开 RUMAH SEWA MURAH KEMASUKAN SEGERA MAY - JUNE 2026FOREST CITY @ Gelang Patah, Secondlink Tuas & PTP Regalia Park A Level 14 1+2 Bedroom 1 Bathroom RM1250 Fully Furnished 56 sqm 10 mins to PTP / 15 mins to Tuas / 15 mins to Legoland, Nusajaya and Medini- parking outdoor - parking indoor rm100/year Facilities : Swimming Pool Playground Gymnasium Can whatsapp belowwww.wasap.my/601129996610/A14 NA HOMES MANAGEMENT SERVICES"
+    },
     {
       "agent": "劲羱",
       "property": "Living Hall",
