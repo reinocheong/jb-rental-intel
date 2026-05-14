@@ -291,3 +291,18 @@ tail -f .logs/wa_daemon.log
 | Stripe 检测不到付款 | Token 过期 | 检查 `.env` 中 `STRIPE_SECRET_KEY` |
 | `googleapiclient` 找不到 | 用错 Python | 使用 Hermes Agent venv 的 `python3` |
 | `[remote rejected] cannot lock ref` | 多个 cron 同时 git push 冲突 | 只保留 1 个导出 cron，删掉重复的（2026-05-14 已修复） |
+| Post Text 全是 FB 界面噪音 | 旧版 clean_post_text 不够强 | 已重写，新帖自动干净；旧数据跑 `python3 /tmp/clean_batch.py` |
+| Agent 名是随机英文（ThrillingGrapefruit） | FB 给匿名用户生成的显示名 | fb_extract.js 自动检测并替换为真实姓名；已有数据跑清理脚本 |
+| Rent 列为空但帖文有价格 | ① 价格被清洗函数吃掉 ② MYR 不被识别 | 已修：提取前先读 raw text + 支持 MYR；回填脚本见 /tmp/backfill_v2.py |
+| Sheet 美化后想还原 | 格式太花/不合口味 | `python3 scripts/reset_sheet_format.py` 一键清回裸数据 |
+
+---
+
+## 辅助脚本速查
+
+| 脚本 | 路径 | 用途 |
+|------|------|------|
+| Sheet 美化 | `scripts/beautify_sheet.py` | 格式化 Sheet（冻结、斑马纹、条件颜色、列宽） |
+| Sheet 还原 | `scripts/reset_sheet_format.py` | 清除所有格式，回到裸数据 |
+| 租金回填 | `/tmp/backfill_v2.py` | 从 raw JSON 补填空租金（一次性的） |
+| Agent 名清理 | `/tmp/clean_agent_only.py` | 清掉FB随机用户名（一次性的） |
