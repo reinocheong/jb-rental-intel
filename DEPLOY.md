@@ -122,13 +122,16 @@ GitHub Pages 自动部署 → `https://reinocheong.github.io/jb-rental-intel/ren
 
 ### 页面特性
 - 手机端卡片式布局，纯上下滑动，零横向滚动
-- 关键词搜索（楼盘名/agent/备注/帖文全文）
-- 类型筛选：出租 / 出售
-- 房型筛选：公寓/排屋/房间/Studio 等（按数量排序）
-- 电话号码完整显示，点击可拨打
-- Post Text 点击展开/收起（默认截断~100字）
-- FB 原帖直达链接
+- 卡片左侧彩色 accent 条：condo 金色 / landed 绿色 / room 蓝色，一眼区分类型
+- 租金琥珀色 pill 标签，今日新房源绿色 NEW 徽章
+- 详情彩色 chips（房型紫色、装修绿色），比纯文字更清晰
+- 标签换行排列，不横滑
+- 关键词搜索（楼盘名/agent/房型/备注）
+- agent 行圆形头像 + 号码点击拨打
+- 帖子原文展开/收起（超过 80 字折叠）
+- 骨架屏加载动画，毛玻璃吸顶 header
 - 深色主题，与 architecture.html 风格一致
+- 数据驱动：空字段不显示，简洁无冗余
 
 ---
 
@@ -144,7 +147,7 @@ GitHub Pages 自动部署 → `https://reinocheong.github.io/jb-rental-intel/ren
 | 每天 12:30 | `python3 outreach/outreach_engine.py --send --slot 3 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段③（1人） |
 | 每天 13:30 | `python3 outreach/outreach_engine.py --send --slot 4 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段④（1人） |
 | 每天 14:30 | `python3 outreach/outreach_engine.py --send --slot 5 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段⑤（1人） |
-| 每 30 分钟 | 导出房源 JSON → git push | `/home/user/jb-rental-intel` | 📋 房源浏览页数据刷新 |
+| 每 30 分钟 | 导出房源 JSON → git push | `/home/user/jb-rental-intel` | 📋 房源浏览页数据刷新（唯一入口，已去重） |
 | 每 5 分钟 | `python3 sub_mgr.py form-process` | `/home/user/jb-rental-intel` | ④ 新注册 → 自动开试用 |
 | 每天 9:00 | `python3 sub_mgr.py remind` | `/home/user/jb-rental-intel` | ④ 试用到期提醒 |
 | 每天 0:00 | `python3 sub_mgr.py check` | `/home/user/jb-rental-intel` | ④ 到期回收权限 |
@@ -287,3 +290,4 @@ tail -f .logs/wa_daemon.log
 | `RefreshError: invalid_scope` | SA Key 没共享给目标 Sheet | 在 Sheet 中共享给 SA 邮箱（编辑者） |
 | Stripe 检测不到付款 | Token 过期 | 检查 `.env` 中 `STRIPE_SECRET_KEY` |
 | `googleapiclient` 找不到 | 用错 Python | 使用 Hermes Agent venv 的 `python3` |
+| `[remote rejected] cannot lock ref` | 多个 cron 同时 git push 冲突 | 只保留 1 个导出 cron，删掉重复的（2026-05-14 已修复） |
