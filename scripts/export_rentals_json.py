@@ -6,6 +6,7 @@ export_rentals_json.py
 """
 import json, sys, os
 from pathlib import Path
+from datetime import datetime
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
@@ -21,7 +22,7 @@ def main():
     creds = Credentials.from_service_account_file(str(SA_KEY), scopes=SCOPES)
     svc = build("sheets", "v4", credentials=creds)
 
-    # 读取全部数据
+    # 读取全部数据（A-L 共12列）
     result = svc.spreadsheets().values().get(
         spreadsheetId=SHEET_ID,
         range=f"'{TAB}'!A:L"
@@ -35,41 +36,31 @@ def main():
     headers = rows[0]
     data_rows = rows[1:]
 
-    # 前端需要的字段（排除 Post Text，体积太大对浏览无意义）
-    FRONTEND_FIELDS = [
-        "Agent Name", "Property Name", "Listing Type", "Property Type",
-        "Rooms", "Furnishing", "Rent (RM)", "Phone",
-        "Link", "Remark", "Scraped At"
-    ]
-
+    # 全部12列都导出：Agent Name, Property Name, Listing Type, Property Type,
+    #   Rooms, Furnishing, Rent (RM), Phone, Link, Remark, Scraped At, Post Text
     listings = []
     for row in data_rows:
         entry = {}
         has_value = False
         for i, h in enumerate(headers):
             val = row[i].strip() if i < len(row) and row[i] else ""
-            if h in FRONTEND_FIELDS:
-                entry[h] = val
-                if val:
-                    has_value = True
-        # 跳过完全空行
+            entry[h] = val
+            if val:
+                has_value = True
         if has_value:
             listings.append(entry)
 
-    # 统计
     print(f"✅ 读取 {len(data_rows)} 行 → {len(listings)} 条有效房源")
 
-    # 写 JSON（无缩进，最小体积）
     os.makedirs(OUTPUT.parent, exist_ok=True)
     with open(OUTPUT, "w", encoding="utf-8") as f:
-        from datetime import datetime
         json.dump({
             "updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "total": len(listings),
             "listings": listings,
         }, f, ensure_ascii=False, separators=(",", ":"))
 
-    print(f"📦 已导出 → {OUTPUT} ({OUTPUT.stat().st_size} bytes)")
+    print(f"📦 已导出 → {OUTPUT} ({OUTPUT.stat().st_size:,} bytes)")
 
 if __name__ == "__main__":
     main()

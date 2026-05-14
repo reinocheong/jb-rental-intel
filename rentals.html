@@ -1,450 +1,347 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>JB Rentals — Cobroke 房源浏览</title>
-<style>
-  :root {
-    --bg: #0d1117;
-    --card-bg: #161b22;
-    --border: #30363d;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --accent: #58a6ff;
-    --accent-dim: #1f6feb33;
-    --tag-bg: #1a2332;
-    --tag-active: #1f6feb;
-    --rent: #3fb950;
-    --phone: #d2a8ff;
-    --link: #58a6ff;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>JB Rentals — 新山房源</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      background: #020617;
+      min-height: 100vh;
+      color: #e2e8f0;
+      padding: 0.75rem;
+      width: 100%;
+      overflow-x: hidden;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { 
-    background: var(--bg); 
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-    overflow-x: hidden;
-    width: 100%;
-  }
+    /* ── Header ── */
+    .header { margin-bottom: 1rem; }
+    .header-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+    .pulse-dot { width: 8px; height: 8px; flex-shrink: 0; background: #22d3ee; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.05rem; font-weight: 700; line-height: 1.3; }
+    .stats { color: #64748b; font-size: 0.7rem; margin-top: 0.2rem; }
+    .stats span { color: #22d3ee; font-weight: 600; }
 
-  /* 容器 — 手机宽度自适应 */
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 12px 12px 40px;
-    width: 100%;
-  }
+    /* ── Search ── */
+    .search-bar {
+      width: 100%; padding: 0.7rem 0.85rem;
+      background: #0f172a; border: 1px solid #1e293b; border-radius: 0.6rem;
+      color: #e2e8f0; font-size: 0.85rem; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+      margin-bottom: 0.6rem;
+    }
+    .search-bar:focus { border-color: #22d3ee; }
+    .search-bar::placeholder { color: #475569; }
 
-  /* 头部 */
-  .header {
-    text-align: center;
-    padding: 24px 0 16px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-  .header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--accent);
-  }
-  .header .sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+    /* ── Filter Chips ── */
+    .filter-section { margin-bottom: 0.5rem; }
+    .filter-label { font-size: 0.65rem; color: #64748b; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip {
+      padding: 0.3rem 0.6rem; border-radius: 1rem;
+      font-size: 0.7rem; font-weight: 500;
+      background: #0f172a; border: 1px solid #1e293b;
+      color: #94a3b8; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+      user-select: none;
+    }
+    .chip:hover { border-color: #334155; color: #cbd5e1; }
+    .chip.active { background: #22d3ee; border-color: #22d3ee; color: #020617; font-weight: 600; }
 
-  /* 搜索栏 */
-  .search-bar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg);
-    padding: 8px 0 4px;
-  }
-  .search-bar input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card-bg);
-    color: var(--text);
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-bar input:focus {
-    border-color: var(--accent);
-  }
-  .search-bar input::placeholder {
-    color: var(--muted);
-  }
+    /* ── Results Header ── */
+    .results-info {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0; margin-bottom: 0.5rem;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.72rem; color: #64748b;
+    }
 
-  /* 标签过滤 */
-  .tag-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 0 12px;
-  }
-  .tag {
-    padding: 4px 10px;
-    border-radius: 14px;
-    font-size: 12px;
-    background: var(--tag-bg);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    transition: all 0.15s;
-  }
-  .tag.active {
-    background: var(--tag-active);
-    color: #fff;
-    border-color: var(--tag-active);
-  }
-  .tag .count {
-    opacity: 0.6;
-    font-size: 11px;
-  }
+    /* ── Cards ── */
+    .card {
+      background: #0f172a; border: 1px solid #1e293b;
+      border-radius: 0.75rem; padding: 0.85rem;
+      margin-bottom: 0.6rem; transition: border-color 0.15s;
+      width: 100%;
+    }
+    .card:hover { border-color: #334155; }
 
-  /* 统计条 */
-  .stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    font-size: 13px;
-    color: var(--muted);
-  }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .card-title {
+      font-size: 0.9rem; font-weight: 600; color: #f1f5f9;
+      line-height: 1.35; flex: 1; word-break: break-word;
+    }
+    .card-badge {
+      flex-shrink: 0; padding: 0.15rem 0.45rem; border-radius: 0.3rem;
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.03em;
+    }
+    .badge-rent { background: rgba(34,211,238,0.15); color: #22d3ee; }
+    .badge-sale { background: rgba(250,204,21,0.15); color: #facc15; }
 
-  /* 卡片网格 */
-  .card-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  @media (min-width: 600px) {
-    .card-grid { grid-template-columns: 1fr 1fr; }
-  }
-  @media (min-width: 900px) {
-    .card-grid { grid-template-columns: 1fr 1fr 1fr; }
-  }
+    .card-meta {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem;
+      margin-bottom: 0.55rem; font-size: 0.72rem;
+    }
+    .meta-chip {
+      padding: 0.2rem 0.45rem; border-radius: 0.3rem;
+      background: rgba(30,41,59,0.6); color: #94a3b8;
+      white-space: nowrap;
+    }
+    .meta-rent { color: #22d3ee; font-weight: 600; }
 
-  /* 卡片 */
-  .card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    transition: border-color 0.15s;
-  }
-  .card:hover { border-color: var(--accent); }
-  .card.hidden { display: none; }
+    .card-phone {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.35rem 0.6rem; border-radius: 0.4rem;
+      background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2);
+      color: #22d3ee; font-size: 0.78rem; font-weight: 600;
+      margin-bottom: 0.55rem; text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .card-phone:hover { background: rgba(34,211,238,0.15); }
 
-  .card .agent {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .card .property {
-    font-size: 14px;
-    color: var(--accent);
-    margin-bottom: 8px;
-    word-break: break-word;
-  }
-  .card .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    margin-bottom: 4px;
-  }
-  .card .row .label { color: var(--muted); }
-  .card .rent { color: var(--rent); font-weight: 600; font-size: 14px; }
-  .card .phone { color: var(--phone); font-size: 13px; }
-  .card .listing-type {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    background: var(--accent-dim);
-    color: var(--accent);
-  }
-  .card .remark {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid var(--border);
-    word-break: break-word;
-  }
-  .card .link-row {
-    margin-top: 8px;
-    font-size: 12px;
-  }
-  .card .link-row a {
-    color: var(--link);
-    text-decoration: none;
-  }
-  .card .link-row a:hover { text-decoration: underline; }
+    .card-post {
+      font-size: 0.72rem; color: #94a3b8; line-height: 1.5;
+      padding: 0.55rem 0.6rem; border-radius: 0.4rem;
+      background: rgba(30,41,59,0.4); margin-bottom: 0.5rem;
+      cursor: pointer; transition: background 0.15s;
+      word-break: break-word;
+    }
+    .card-post:hover { background: rgba(30,41,59,0.7); }
+    .card-post.expanded { max-height: none; }
+    .post-toggle {
+      color: #22d3ee; font-size: 0.65rem; margin-left: 0.3rem;
+      font-weight: 500; white-space: nowrap;
+    }
 
-  /* 加载更多 */
-  .load-more {
-    text-align: center;
-    padding: 20px;
-  }
-  .load-more button {
-    padding: 10px 32px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    color: var(--accent);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .load-more button:hover {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-  }
-  .load-more button:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
+    .card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.62rem; color: #475569;
+    }
+    .card-link {
+      color: #22d3ee; text-decoration: none; font-size: 0.65rem;
+      font-weight: 500;
+    }
+    .card-link:hover { text-decoration: underline; }
+    .card-agent { color: #64748b; }
 
-  /* 加载状态 */
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 15px;
-  }
-  .spinner {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── Empty State ── */
+    .empty {
+      text-align: center; padding: 2rem 1rem; color: #475569;
+      font-size: 0.8rem;
+    }
 
-  /* 空状态 */
-  .empty {
-    text-align: center;
-    padding: 32px;
-    color: var(--muted);
-    font-size: 15px;
-  }
-</style>
+    /* ── Footer ── */
+    .footer {
+      text-align: center; padding: 1rem 0; color: #334155;
+      font-size: 0.62rem; border-top: 1px solid #1e293b; margin-top: 0.5rem;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
+
+  <!-- Header -->
   <div class="header">
-    <h1>🏠 JB Rentals</h1>
-    <div class="sub">Cobroke 房源快速浏览 · 数据每日更新</div>
+    <div class="header-row">
+      <div class="pulse-dot"></div>
+      <h1>Smart Tenancy Pro<br>新山房源</h1>
+    </div>
+    <div class="stats">共 <span id="total-count">—</span> 条房源 · 更新于 <span id="update-time">加载中…</span></div>
   </div>
 
-  <div class="search-bar">
-    <input type="text" id="search" placeholder="搜索楼盘名、agent 名、房型…" autofocus>
-  </div>
-  <div class="tag-cloud" id="tags"></div>
-  <div class="stats">
-    <span id="stats-count">加载中…</span>
-    <span id="stats-updated"></span>
+  <!-- Search -->
+  <input class="search-bar" id="search" type="text" placeholder="搜索房源名称、中介、备注…" oninput="render()">
+
+  <!-- Listing Type Filter -->
+  <div class="filter-section">
+    <div class="filter-label">类型</div>
+    <div class="chip-row" id="filter-listing-type"></div>
   </div>
 
-  <div class="card-grid" id="cards"></div>
-
-  <div class="load-more" id="load-more" style="display:none">
-    <button id="load-btn">加载更多</button>
+  <!-- Property Type Filter -->
+  <div class="filter-section">
+    <div class="filter-label">房型</div>
+    <div class="chip-row" id="filter-property-type"></div>
   </div>
 
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div>加载房源数据…</div>
+  <!-- Results -->
+  <div class="results-info">
+    <span id="showing">显示 — 条</span>
   </div>
-</div>
+  <div id="card-container"></div>
+  <div class="empty" id="empty-msg" style="display:none">没有匹配的房源</div>
+
+  <div class="footer">Data from JB Rentals Sheet · Smart Tenancy Pro</div>
 
 <script>
-// —— 全局状态 ——
-let allListings = [];
-let filtered = [];
-let shown = 0;
-const PAGE = 30;
+  let ALL = [];
+  let activeListingType = null;
+  let activePropertyType = null;
 
-// —— 工具 ——
-function $(id) { return document.getElementById(id); }
+  const TOP_PROPERTY_TYPES = ['公寓','排屋','双层排屋','单层排屋','房间','Studio','Flat','中房','大房','小房'];
 
-// —— 渲染标签云 ——
-function buildTags(listings) {
-  const count = {};
-  listings.forEach(l => {
-    const pn = (l['Property Name'] || '').trim();
-    if (pn && pn.length > 2) count[pn] = (count[pn] || 0) + 1;
-  });
-  // 取 top 25，按数量降序
-  const sorted = Object.entries(count)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 25);
+  // ── Load JSON ──
+  (async () => {
+    try {
+      const r = await fetch('data/rentals.json');
+      const d = await r.json();
+      ALL = d.listings;
+      document.getElementById('update-time').textContent = d.updated;
+      document.getElementById('total-count').textContent = d.total;
+      buildChips();
+      render();
+    } catch(e) {
+      document.getElementById('card-container').innerHTML = '<div class="empty">⚠️ 数据加载失败，请稍后再试</div>';
+      document.getElementById('update-time').textContent = '错误';
+    }
+  })();
 
-  const tagsEl = $('tags');
-  tagsEl.innerHTML = sorted.map(([name, n]) =>
-    `<span class="tag" data-building="${escHtml(name)}">${escHtml(name)} <span class="count">${n}</span></span>`
-  ).join('');
-
-  // 点击事件
-  tagsEl.querySelectorAll('.tag').forEach(tag => {
-    tag.addEventListener('click', () => {
-      const building = tag.dataset.building;
-      if (tag.classList.contains('active')) {
-        // 取消选中 → 显示全部
-        tag.classList.remove('active');
-        applyFilters('');
-      } else {
-        // 选中
-        tagsEl.querySelectorAll('.tag.active').forEach(t => t.classList.remove('active'));
-        tag.classList.add('active');
-        applyFilters(building);
-      }
+  // ── Filter Chips ──
+  function buildChips() {
+    // Listing Type chips
+    const lt = document.getElementById('filter-listing-type');
+    const types = ['全部','出租','出售'];
+    types.forEach(t => {
+      const c = document.createElement('span');
+      c.className = 'chip' + (t === '全部' ? ' active' : '');
+      c.textContent = t;
+      c.onclick = () => {
+        lt.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
+        c.classList.add('active');
+        activeListingType = t === '全部' ? null : t;
+        render();
+      };
+      lt.appendChild(c);
     });
-  });
-}
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+    // Property Type chips — only count top types
+    const pt = document.getElementById('filter-property-type');
+    const counts = {};
+    ALL.forEach(l => {
+      const v = l['Property Type'] || '其它';
+      counts[v] = (counts[v] || 0) + 1;
+    });
 
-// —— 过滤 ——
-function applyFilters(building) {
-  const search = $('search').value.toLowerCase().trim();
-  filtered = allListings.filter(l => {
-    // 楼盘标签过滤
-    if (building && (l['Property Name'] || '').trim() !== building) return false;
-    // 搜索词过滤
-    if (search) {
-      const haystack = [
-        l['Agent Name'], l['Property Name'], l['Property Type'],
-        l['Listing Type'], l['Rooms'], l['Remark'], l['Phone']
-      ].join(' ').toLowerCase();
-      if (!haystack.includes(search)) return false;
-    }
-    return true;
-  });
-  shown = 0;
-  $('cards').innerHTML = '';
-  renderMore();
-  updateStats();
-}
+    const top = ['全部'];
+    TOP_PROPERTY_TYPES.forEach(t => { if (counts[t]) top.push(t); });
+    // add remaining sorted
+    const rest = Object.entries(counts)
+      .filter(([k]) => !TOP_PROPERTY_TYPES.includes(k))
+      .sort((a,b) => b[1]-a[1])
+      .map(([k]) => k);
+    top.push(...rest.slice(0, 10)); // max ~20 total chips
 
-function updateStats() {
-  $('stats-count').textContent = `显示 ${Math.min(shown, filtered.length)} / ${filtered.length} 条`;
-}
-
-// —— 渲染卡片 ——
-function renderMore() {
-  const slice = filtered.slice(shown, shown + PAGE);
-  if (slice.length === 0) {
-    $('load-more').style.display = 'none';
-    if (shown === 0) {
-      $('cards').innerHTML = '<div class="empty">没有匹配的房源</div>';
-    }
-    return;
+    top.forEach(t => {
+      const c = document.createElement('span');
+      c.className = 'chip' + (t === '全部' ? ' active' : '');
+      const cnt = t === '全部' ? ALL.length : (counts[t]||0);
+      c.textContent = t + ' ' + cnt;
+      c.onclick = () => {
+        pt.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
+        c.classList.add('active');
+        activePropertyType = t === '全部' ? null : t;
+        render();
+      };
+      pt.appendChild(c);
+    });
   }
 
-  const html = slice.map(l => {
-    const rent = l['Rent (RM)'] ? `RM ${l['Rent (RM)']}` : '';
-    const phone = l['Phone'] ? l['Phone'] : '';
+  // ── Render ──
+  function render() {
+    const q = (document.getElementById('search').value || '').toLowerCase();
+    let filtered = ALL;
+
+    if (activeListingType) {
+      filtered = filtered.filter(l => l['Listing Type'] === activeListingType);
+    }
+    if (activePropertyType) {
+      filtered = filtered.filter(l => (l['Property Type'] || '其它') === activePropertyType);
+    }
+    if (q) {
+      filtered = filtered.filter(l => {
+        return ['Agent Name','Property Name','Remark','Post Text'].some(k =>
+          (l[k] || '').toLowerCase().includes(q)
+        );
+      });
+    }
+
+    document.getElementById('showing').textContent = `显示 ${filtered.length} 条`;
+    document.getElementById('empty-msg').style.display = filtered.length === 0 ? 'block' : 'none';
+
+    const container = document.getElementById('card-container');
+    container.innerHTML = filtered.map(l => cardHTML(l)).join('');
+  }
+
+  function cardHTML(l) {
+    const name = l['Property Name'] || l['Agent Name'] || '未命名';
+    const agent = l['Agent Name'] || '';
     const listingType = l['Listing Type'] || '';
-    const remark = l['Remark'] || '';
-    const link = l['Link'] || '';
+    const propertyType = l['Property Type'] || '';
     const rooms = l['Rooms'] || '';
     const furnishing = l['Furnishing'] || '';
-    const scraped = (l['Scraped At'] || '').slice(0, 10);
+    const rent = l['Rent (RM)'] || '';
+    const phone = l['Phone'] || '';
+    const link = l['Link'] || '';
+    const remark = l['Remark'] || '';
+    const scraped = l['Scraped At'] || '';
+    const postText = l['Post Text'] || '';
+
+    const badgeClass = listingType === '出售' ? 'badge-sale' : 'badge-rent';
+    const badgeText = listingType || '';
+
+    // meta chips
+    let meta = '';
+    if (propertyType) meta += `<span class="meta-chip">${esc(propertyType)}</span>`;
+    if (rooms) meta += `<span class="meta-chip">${esc(rooms)}</span>`;
+    if (furnishing) meta += `<span class="meta-chip">${esc(furnishing)}</span>`;
+    if (rent) meta += `<span class="meta-chip meta-rent">RM ${esc(rent)}</span>`;
+    if (remark) meta += `<span class="meta-chip">${esc(remark.slice(0,30))}${remark.length>30?'…':''}</span>`;
+
+    // phone
+    let phoneHTML = '';
+    if (phone) {
+      phoneHTML = `<a class="card-phone" href="tel:${esc(phone)}">📞 ${esc(phone)}</a>`;
+    }
+
+    // post text
+    let postHTML = '';
+    if (postText) {
+      const maxLen = 100;
+      const truncated = postText.length > maxLen;
+      const display = truncated ? postText.slice(0, maxLen) + '…' : postText;
+      postHTML = `<div class="card-post" onclick="this.classList.toggle('expanded');this.querySelector('.full').style.display=this.classList.contains('expanded')?'inline':'none';this.querySelector('.short').style.display=this.classList.contains('expanded')?'none':'inline';">
+        <span class="short">${esc(display)}</span>
+        <span class="full" style="display:none">${esc(postText)}</span>
+        ${truncated ? '<span class="post-toggle">展开▼</span>' : ''}
+      </div>`;
+    }
+
+    // footer
+    const date = scraped ? scraped.slice(0,10) : '';
 
     return `
       <div class="card">
-        <div class="agent">${escHtml(l['Agent Name'] || '—')}</div>
-        <div class="property">${escHtml(l['Property Name'] || l['Property Type'] || '—')}</div>
-        <div class="row">
-          <span class="label">${rent ? `<span class="rent">${escHtml(rent)}</span>` : ''}
-          ${rooms ? ` · ${escHtml(rooms)}` : ''}
-          ${furnishing ? ` · ${escHtml(furnishing)}` : ''}</span>
-          ${listingType ? `<span class="listing-type">${escHtml(listingType)}</span>` : ''}
+        <div class="card-top">
+          <div class="card-title">${esc(name)}</div>
+          ${badgeText ? `<div class="card-badge ${badgeClass}">${esc(badgeText)}</div>` : ''}
         </div>
-        <div class="row" style="margin-top:2px">
-          ${phone ? `<span class="phone">📞 ${escHtml(phone)}</span>` : ''}
-          <span style="color:var(--muted);font-size:11px">${scraped}</span>
+        ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+        ${phoneHTML}
+        ${postHTML}
+        <div class="card-footer">
+          <span>${agent ? esc(agent) + ' · ' : ''}${date}</span>
+          ${link ? `<a class="card-link" href="${esc(link)}" target="_blank" onclick="event.stopPropagation()">FB 原帖 →</a>` : ''}
         </div>
-        ${remark ? `<div class="remark">${escHtml(remark)}</div>` : ''}
-        ${link ? `<div class="link-row"><a href="${escHtml(link)}" target="_blank" rel="noopener">📋 查看 FB 原帖 →</a></div>` : ''}
       </div>`;
-  }).join('');
-
-  $('cards').insertAdjacentHTML('beforeend', html);
-  shown += slice.length;
-
-  // 更新加载更多按钮
-  if (shown < filtered.length) {
-    $('load-more').style.display = 'block';
-    $('load-btn').disabled = false;
-  } else {
-    $('load-more').style.display = 'none';
   }
-  updateStats();
-}
 
-// —— 初始化 ——
-async function init() {
-  try {
-    const resp = await fetch('data/rentals.json');
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    allListings = data.listings;
-    filtered = allListings;
-
-    // 更新时间
-    $('stats-updated').textContent = `数据更新时间: ${data.updated || '—'}`;
-
-    // 构建标签
-    buildTags(allListings);
-
-    // 首屏渲染
-    renderMore();
-
-    // 隐藏加载动画
-    $('loading').style.display = 'none';
-
-  } catch (err) {
-    $('loading').innerHTML = `<div class="empty">⚠️ 加载失败: ${escHtml(err.message)}</div>`;
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
   }
-}
-
-// —— 事件绑定 ——
-let searchTimer;
-$('search').addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    const activeTag = document.querySelector('.tag.active');
-    applyFilters(activeTag ? activeTag.dataset.building : '');
-  }, 200);
-});
-
-$('load-btn').addEventListener('click', () => {
-  $('load-btn').disabled = true;
-  renderMore();
-});
-
-// 启动
-init();
 </script>
 </body>
 </html>
