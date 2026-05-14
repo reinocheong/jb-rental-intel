@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>JB Rentals — 房源浏览</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      background: #020617;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ===== Top Bar ===== */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: #020617;
+      padding: 0.75rem;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    /* Header row */
+    .header-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+    .pulse-dot {
+      width: 8px; height: 8px; flex-shrink: 0;
+      background: #22d3ee; border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .title { font-size: 0.95rem; font-weight: 700; }
+    .count { color: #64748b; font-size: 0.7rem; margin-left: auto; white-space: nowrap; }
+
+    /* Search */
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%; font-size: 0.8rem;
+      padding: 0.5rem 0.75rem 0.5rem 2rem;
+      background: #0f172a; border: 1px solid #1e293b; border-radius: 0.5rem;
+      color: #e2e8f0;
+    }
+    .search-wrap input::placeholder { color: #475569; }
+    .search-wrap input:focus { outline: none; border-color: #334155; }
+    .search-icon {
+      position: absolute; left: 0.65rem; top: 50%;
+      transform: translateY(-50%);
+      color: #475569; font-size: 0.75rem;
+    }
+
+    /* ===== Filters ===== */
+    .filters {
+      display: flex; gap: 0.35rem; flex-wrap: wrap;
+      padding: 0.5rem 0.75rem;
+    }
+    .chip {
+      font-size: 0.65rem; font-weight: 500;
+      padding: 0.2rem 0.55rem;
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      background: #0f172a;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .chip.active, .chip:hover {
+      background: #1e293b;
+      color: #22d3ee;
+      border-color: #22d3ee;
+    }
+
+    /* ===== Listing Cards ===== */
+    .listings { padding: 0 0.75rem 2rem; }
+
+    .card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .card.hidden { display: none; }
+
+    /* Property name */
+    .card-property {
+      font-size: 0.85rem; font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    /* Rent */
+    .card-rent {
+      font-size: 0.75rem; font-weight: 700;
+      color: #22d3ee;
+      margin-bottom: 0.35rem;
+    }
+
+    /* Meta row */
+    .card-meta {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      margin-bottom: 0.4rem;
+    }
+    .tag {
+      font-size: 0.6rem; font-weight: 500;
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.25rem;
+      background: #1e293b;
+      color: #94a3b8;
+    }
+    .tag.sale { background: #064e3b; color: #34d399; }
+    .tag.rent { background: #172554; color: #60a5fa; }
+
+    /* Contact row */
+    .card-contact {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+    }
+    .card-contact .agent { color: #cbd5e1; font-weight: 500; }
+    .card-contact .phone { color: #22d3ee; }
+    .card-contact a {
+      color: #22d3ee; text-decoration: none;
+      border-bottom: 1px dashed #334155;
+    }
+    .card-contact a:hover { border-color: #22d3ee; }
+
+    /* Remark */
+    .card-remark {
+      font-size: 0.65rem; color: #475569;
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+
+    /* Footer */
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.55rem; color: #334155;
+    }
+
+    /* ===== Empty State ===== */
+    .empty {
+      text-align: center; padding: 3rem 1rem;
+      color: #475569;
+    }
+    .empty .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .empty p { font-size: 0.8rem; }
+
+    /* ===== Loading ===== */
+    .loading {
+      text-align: center; padding: 2rem 1rem;
+      color: #475569;
+    }
+    .spinner {
+      display: inline-block;
+      width: 1.2rem; height: 1.2rem;
+      border: 2px solid #1e293b;
+      border-top-color: #22d3ee;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Error ===== */
+    .error-bar {
+      background: #7f1d1d;
+      color: #fca5a5;
+      padding: 0.5rem 0.75rem;
+      margin: 0 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+    .error-bar.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="header-row">
+    <div class="pulse-dot"></div>
+    <span class="title">JB 房源</span>
+    <span class="count" id="count">加载中…</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="搜楼盘名 / agent / 户型…" autocomplete="off">
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters" id="filters">
+  <span class="chip active" data-filter="all">全部</span>
+  <span class="chip" data-filter="rent">出租</span>
+  <span class="chip" data-filter="sale">出售</span>
+  <span class="chip" data-filter="withphone">有电话</span>
+</div>
+
+<!-- Error -->
+<div class="error-bar" id="error">加载失败，请检查网络连接</div>
+
+<!-- Listings -->
+<div class="listings" id="listings">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<script>
+(function() {
+  const DATA_URL = 'data/rentals.json';
+
+  let allData = [];
+  let activeFilter = 'all';
+  let searchTerm = '';
+
+  // ── Fetch ──
+  async function load() {
+    try {
+      const resp = await fetch(DATA_URL);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      allData = data.listings || [];
+      applyAll();
+    } catch (e) {
+      document.getElementById('error').classList.add('show');
+      document.getElementById('listings').innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>数据加载失败</p></div>';
+    }
+  }
+
+  // ── Render ──
+  function applyAll() {
+    const matching = allData.filter(matches);
+    render(matching);
+    document.getElementById('count').textContent = matching.length + ' 条';
+  }
+
+  function matches(item) {
+    // Filter
+    if (activeFilter === 'rent' && item.listing_type !== '出租') return false;
+    if (activeFilter === 'sale' && item.listing_type !== '出售') return false;
+    if (activeFilter === 'withphone' && (!item.phone || !item.phone.trim())) return false;
+
+    // Search
+    if (!searchTerm) return true;
+    const q = searchTerm.toLowerCase();
+    const fields = [
+      item.property, item.agent, item.rooms,
+      item.rent, item.remark, item.post_text,
+      item.property_type, item.furnishing, item.listing_type
+    ];
+    return fields.some(f => f && f.toLowerCase().includes(q));
+  }
+
+  function render(items) {
+    const container = document.getElementById('listings');
+    if (!items.length) {
+      container.innerHTML = '<div class="empty"><div class="icon">📭</div><p>没有匹配的房源</p></div>';
+      return;
+    }
+
+    const html = items.map(item => {
+      const isRent = item.listing_type === '出租';
+      const isSale = item.listing_type === '出售';
+      const typeClass = isRent ? 'rent' : (isSale ? 'sale' : '');
+
+      // Rent display
+      let rentHtml = '';
+      if (item.rent && item.rent.trim()) {
+        rentHtml = '<div class="card-rent">💰 RM ' + esc(item.rent) + '</div>';
+      }
+
+      // Tags
+      let tags = [];
+      if (item.listing_type) tags.push('<span class="tag ' + typeClass + '">' + esc(item.listing_type) + '</span>');
+      if (item.property_type) tags.push('<span class="tag">' + esc(item.property_type) + '</span>');
+      if (item.rooms) tags.push('<span class="tag">' + esc(item.rooms) + '</span>');
+      if (item.furnishing) tags.push('<span class="tag">' + esc(item.furnishing) + '</span>');
+
+      // Property
+      let prop = item.property || '(无标题)';
+
+      // Contact
+      let phoneHtml = '';
+      if (item.phone && item.phone.trim()) {
+        const p = item.phone.replace(/[^\d+\-]/g, '').trim().replace(/\s+/g, '');
+        phoneHtml = '<a href="https://wa.me/' + prepPhone(p) + '" target="_blank" rel="noopener">📞 ' + esc(p) + '</a>';
+      }
+
+      // FB Link
+      let linkHtml = '';
+      if (item.link && item.link.trim()) {
+        linkHtml = '<a href="' + esc(item.link) + '" target="_blank" rel="noopener">FB 原文 ↗</a>';
+      }
+
+      // Scraped date
+      let dateStr = '';
+      if (item.scraped_at) {
+        const d = item.scraped_at.split(' ')[0] || item.scraped_at.slice(0,10);
+        dateStr = '📅 ' + d;
+      }
+
+      return '<div class="card">'
+        + '<div class="card-property">' + esc(prop) + '</div>'
+        + rentHtml
+        + (tags.length ? '<div class="card-meta">' + tags.join('') + '</div>' : '')
+        + '<div class="card-contact">'
+          + '<span class="agent">👤 ' + esc(item.agent || '?') + '</span>'
+          + (phoneHtml ? ' | ' + phoneHtml : '')
+        + '</div>'
+        + (item.remark ? '<div class="card-remark">' + esc(item.remark) + '</div>' : '')
+        + '<div class="card-footer">'
+          + '<span>' + dateStr + '</span>'
+          + (linkHtml || '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    container.innerHTML = html;
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'&quot;');
+  }
+
+  function prepPhone(p) {
+    // Remove non-digits, then format
+    let d = p.replace(/\D/g, '');
+    if (d.startsWith('6')) d = d.slice(1); // strip leading 6 for Malaysian
+    return '6' + d;
+  }
+
+  // ── Events ──
+  document.getElementById('search').addEventListener('input', function(e) {
+    searchTerm = this.value.trim();
+    applyAll();
+  });
+
+  document.getElementById('filters').addEventListener('click', function(e) {
+    if (!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#filters .chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    activeFilter = e.target.dataset.filter;
+    applyAll();
+  });
+
+  // ── Init ──
+  load();
+})();
+</script>
+</body>
+</html>
