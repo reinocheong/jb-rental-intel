@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-05-15T00:07:24.539842+08:00",
-  "total": 418,
+  "updated_at": "2026-05-15T00:37:37.284740+08:00",
+  "total": 422,
   "today_new": 0,
   "top_properties": [
     "Pelangi",
@@ -15,6 +15,62 @@
     "Taman Puteri Wangsa"
   ],
   "listings": [
+    {
+      "agent": "劲羱",
+      "property": "Living Hall",
+      "type": "出售",
+      "property_type": "双层排屋",
+      "rooms": "",
+      "furnishing": "",
+      "rent": "",
+      "phone": "0189639898, 60189639898, 61553779302330",
+      "link": "https://www.facebook.com/groups/1313487628797877/posts/4417216178424991",
+      "remark": "[Group2] 售价: RM750; 有停车位",
+      "scraped_at": "2026-05-15 00:31:45",
+      "post_text": "劲羱 FOR SALE | ROSMERAH双层排屋出售 Double Storey Terrace House *2 STOREY TERRACE HOUSE FOR SALE*JALAN Rosmerah 4/XX, JOHOR JAYASize: 22*704B3B with yard & store room2 Living Hall(Upstair & downstairs) & 1 Dining RoomDry kitchen, Wet Kitchen, Laundry AreaBare Unit with partially furnished car park done with owning and can park 2 cars very good condition, no water leakinggood sunlight (采光很好）maindoor facing northgated & guardednearby have DIY, 99 speedmart, supermarket, Hospital PG , University, International school, high school & police station etc (within 5 km)Asking Price: RM750K (nego) Bank Value：MATCHED有意者欢迎来电咨询 JY Lai 0189639898 或http://www.wasap.my/60189639898/rosmerahDST750khttp://www.wasap.my/60189639898/rosmerahDST750khttp://www.wasap.my/60189639898/rosmerahDST750k想 要 了 解 更 多 其 他 房 屋 咨 询 可"
+    },
+    {
+      "agent": "马来西亚柔佛地产买卖投资",
+      "property": "Taman century jalan harimau single storey for rent",
+      "type": "出租",
+      "property_type": "单层排屋",
+      "rooms": "803房2厕",
+      "furnishing": "",
+      "rent": "",
+      "phone": "0167516367",
+      "link": "https://www.facebook.com/groups/1467428250213843/posts/4141341016155873",
+      "remark": "[JB新山租房与出租]",
+      "scraped_at": "2026-05-15 00:31:28",
+      "post_text": "马来西亚柔佛地产买卖投资 Taman century jalan harimau single storey for rent22 x 803 bed 2 bath3aircon ，1 water heater ，washing machine ,fridge Mattress ~rental 2600call/whatapps： 0167516367 darrenIQI REALTY SDN BHDREN20489"
+    },
+    {
+      "agent": "Jllynna Sim",
+      "property": "Mount Austin",
+      "type": "出租",
+      "property_type": "房间",
+      "rooms": "",
+      "furnishing": "半家私",
+      "rent": "2,700",
+      "phone": "01129381792, 601129381792",
+      "link": "https://www.facebook.com/groups/801784763175081/posts/27255606524032878",
+      "remark": "[Group3-房屋出租]",
+      "scraped_at": "2026-05-15 00:02:00",
+      "post_text": "Jllynna Sim 8小时 +4Jllynna Property 2天 · 分享对象： 公开For RentHavona @Mount Austin- 2 bedrooms- 2 bathrooms- 953sqft- Middle floor- Partial furnished- For rent 6 months onlyRental Rm 2700 per monthMove in conditions*Prefer good profile*If interested pls contact wa.me/60112938179201129381792 Jllynna Sim"
+    },
+    {
+      "agent": "杨开心",
+      "property": "大学城",
+      "type": "出租",
+      "property_type": "单层排屋",
+      "rooms": "",
+      "furnishing": "半家私",
+      "rent": "",
+      "phone": "0179589368",
+      "link": "https://www.facebook.com/groups/1467428250213843/posts/4141381906151784",
+      "remark": "[JB新山租房与出租]",
+      "scraped_at": "2026-05-15 00:01:17",
+      "post_text": "杨开心 2小时 大学城出租Taman universiti Single Storey house 20x653 rooms 2 bathroomsPartial furnished Asking price: 1,500Jenny 0179589368+3"
+    },
     {
       "agent": "Alex Tee",
       "property": "Alex Tee Apartment",
