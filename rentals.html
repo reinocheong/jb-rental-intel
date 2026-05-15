@@ -331,6 +331,39 @@
       padding: 0.25rem 0.55rem; border-radius: 0.35rem;
       cursor: pointer; white-space: nowrap;
     }
+
+    /* ── Payment Overlay ── */
+    .pay-card {
+      width: 100%; max-width: 340px;
+      background: var(--card-bg);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .pay-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .pay-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .pay-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.6; }
+    .pay-price {
+      font-size: 1.8rem; font-weight: 700; color: var(--accent);
+      margin: 0.8rem 0;
+    }
+    .pay-price small { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+    .pay-btn {
+      display: block; width: 100%; padding: 0.75rem;
+      border-radius: 0.65rem; border: none;
+      background: var(--accent);
+      color: #0f172a;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      margin-top: 0.5rem;
+      transition: opacity 0.15s;
+    }
+    .pay-btn:active { opacity: 0.8; }
+    .pay-note {
+      margin-top: 1rem; font-size: 0.6rem; color: #334155;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -378,6 +411,23 @@
   </div>
 </div>
 
+<!-- Payment overlay -->
+<div class="login-overlay" id="payOverlay" style="display:none">
+  <div class="pay-card">
+    <div class="pay-icon">😢</div>
+    <div class="pay-title">试用已到期</div>
+    <div class="pay-desc">订阅继续查看最新房源<br>每天更新 JB 租房 agent 数据</div>
+    <div class="pay-price">RM 9.90 <small>/ 月</small></div>
+    <a class="pay-btn" id="payLink" href="https://buy.stripe.com/7sY3cu2GOa5u9rp0cI7bW02" target="_blank">
+      💳 订阅续费
+    </a>
+    <div class="pay-note">
+      付款后自动开通，无需等待<br>
+      有问题联系 smarttenancypro@gmail.com
+    </div>
+  </div>
+</div>
+
 <div class="listings" id="listings">
   <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
   <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
@@ -388,7 +438,7 @@
 
 <script>
 // ── Auth Config ───────────────────────────────────────────
-const AUTH_URL = 'https://age-brother-poker-browser.trycloudflare.com';
+const AUTH_URL = 'https://isaac-shaved-fifth-nearest.trycloudflare.com';
 const GOOGLE_CLIENT_ID = '788231638010-v1k56qso1brtia2u9ddqghbbpes4pkm9.apps.googleusercontent.com';
 const TOKEN_KEY = 'jb_rentals_token';
 const NAME_KEY = 'jb_rentals_name';
@@ -436,9 +486,19 @@ function showLoading() {
 function showApp() {
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('payOverlay').style.display = 'none';
   document.querySelector('.top-bar').style.display = '';
   document.getElementById('listings').style.display = '';
   document.querySelector('.footnote').style.display = '';
+}
+
+function showPayWall() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('payOverlay').style.display = 'flex';
+  document.querySelector('.top-bar').style.display = 'none';
+  document.getElementById('listings').style.display = 'none';
+  document.querySelector('.footnote').style.display = 'none';
 }
 
 async function doLogin() {
@@ -521,8 +581,15 @@ async function handleGoogleLogin(response) {
     const data = await r.json();
     if (data.error) {
       errEl.textContent = data.error;
+      return;
+    }
+
+    saveAuth(data.token, data.name);
+
+    // Check status: expired → payment page, active → data
+    if (data.status === 'expired' || data.status === '🔴 已过期') {
+      showPayWall();
     } else {
-      saveAuth(data.token, data.name);
       showLoading();
       await load();
       showApp();

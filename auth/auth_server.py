@@ -147,6 +147,8 @@ def verify_login(email, password):
         return None, '此账号使用 Google 登录，请点击 Google 按钮'
 
     name = (row[2] or email).strip()
+    user_status = (row[4] or '').strip()
+    trial_expires_str = (row[3] or '').strip()
     ok, err = check_user_status(row)
     if not ok:
         return None, err
@@ -155,11 +157,12 @@ def verify_login(email, password):
         return None, '密码错误'
 
     token, expires = create_session(email, name)
-    return {'token': token, 'name': name, 'expires': expires}, None
+    return {'token': token, 'name': name, 'expires': expires,
+            'status': user_status, 'trial_expires': trial_expires_str}, None
 
 # ── Google 登录 ──────────────────────────────────────────
 def verify_google_login(google_token):
-    """Google 登录，首次自动开通试用"""
+    """Google 登录，首次自动开通试用。到期用户也可登录（看付费页）"""
     profile = verify_google_id_token(google_token)
     if not profile:
         return None, 'Google 验证失败，请重试'
@@ -170,18 +173,20 @@ def verify_google_login(google_token):
     row, _ = find_user(email)
 
     if row:
-        # 已有账号
-        ok, err = check_user_status(row)
-        if not ok:
-            return None, err
+        # 已有账号 — 不管是否到期，都允许登录
+        user_status = (row[4] or '').strip()
+        trial_expires_str = (row[3] or '').strip()
         is_new = False
     else:
         # 首次登录 → 自动开通试用
         auto_create_trial(email, name)
+        user_status = 'active'
+        trial_expires_str = (datetime.now() + timedelta(days=TRIAL_DAYS)).isoformat()
         is_new = True
 
     token, expires = create_session(email, name)
-    return {'token': token, 'name': name, 'expires': expires, 'is_new': is_new}, None
+    return {'token': token, 'name': name, 'expires': expires,
+            'is_new': is_new, 'status': user_status, 'trial_expires': trial_expires_str}, None
 
 # ── Token 验证 ───────────────────────────────────────────
 def validate_token(token):
