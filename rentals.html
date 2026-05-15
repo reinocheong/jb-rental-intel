@@ -263,6 +263,64 @@
       text-align: center; padding: 1.5rem 0.5rem 1rem;
       font-size: 0.6rem; color: #334155;
     }
+
+    /* ── Login Overlay ── */
+    .login-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .login-card {
+      width: 100%; max-width: 340px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .login-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .login-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .login-sub { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .login-field {
+      width: 100%; padding: 0.7rem 0.85rem;
+      border-radius: 0.65rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-primary);
+      font-size: 0.82rem; outline: none;
+      margin-bottom: 0.6rem;
+      transition: border 0.2s;
+    }
+    .login-field:focus { border-color: rgba(245,158,11,0.4); }
+    .login-field::placeholder { color: var(--text-muted); }
+    .login-btn {
+      width: 100%; padding: 0.7rem;
+      border-radius: 0.65rem; border: none;
+      background: var(--accent);
+      color: #0f172a;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.3rem;
+      transition: opacity 0.15s;
+    }
+    .login-btn:active { opacity: 0.8; }
+    .login-btn:disabled { opacity: 0.4; }
+    .login-error {
+      font-size: 0.68rem; color: #f87171;
+      margin-top: 0.5rem; min-height: 1.2em;
+    }
+    .login-foot {
+      margin-top: 1.2rem;
+      font-size: 0.62rem; color: #334155;
+    }
+    .logout-btn {
+      font-size: 0.62rem; color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.55rem; border-radius: 0.35rem;
+      cursor: pointer; white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -285,22 +343,142 @@
   <div class="tag-row" id="tagRow"></div>
 </div>
 
+<!-- Login overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-icon">🏠</div>
+    <div class="login-title">JB Rentals</div>
+    <div class="login-sub">登录查看最新房源</div>
+    <input class="login-field" type="email" id="loginEmail" placeholder="📧 邮箱" autocomplete="email">
+    <input class="login-field" type="password" id="loginPw" placeholder="🔒 密码" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">登 录</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-foot">没有账号？联系客服开通<br>smarttenancypro@gmail.com</div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="login-overlay" id="loadingOverlay" style="display:none">
+  <div class="login-card">
+    <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
+  </div>
+</div>
+
 <div class="listings" id="listings">
   <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
   <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
   <div class="skeleton"><div class="sk-line"></div><div class="sk-line w3"></div><div class="sk-line w2"></div></div>
 </div>
 
-<p class="footnote">每 30 分钟自动更新 · 数据只读不写 Sheets</p>
+<p class="footnote">每 30 分钟自动更新 · 数据只读不写 Sheets · <a href="#" onclick="doLogout()" style="color:var(--text-muted)">退出登录</a></p>
 
 <script>
+// ── Auth Config ───────────────────────────────────────────
+const AUTH_URL = 'http://bore.pub:44200';
+const TOKEN_KEY = 'jb_rentals_token';
+const NAME_KEY = 'jb_rentals_name';
+
+// ── Data ──────────────────────────────────────────────────
 let DATA = { total: 0, today_new: 0, listings: [], top_properties: [] };
 let activeTag = '';
 
-async function load() {
+// ── Auth ──────────────────────────────────────────────────
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function saveAuth(token, name) {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(NAME_KEY, name);
+}
+function clearAuth() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(NAME_KEY);
+}
+
+async function checkAuth() {
+  const token = getToken();
+  if (!token) { showLogin(); return false; }
+  // Quick validate
   try {
-    const r = await fetch('data/rentals.json?' + Date.now());
+    const r = await fetch(AUTH_URL + '/data?token=' + encodeURIComponent(token));
+    if (r.status === 401) { clearAuth(); showLogin(); return false; }
+    return true;
+  } catch(e) { return !!token; } // offline fallback
+}
+
+function showLogin() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.querySelector('.top-bar').style.display = 'none';
+  document.getElementById('listings').style.display = 'none';
+  document.querySelector('.footnote').style.display = 'none';
+}
+
+function showLoading() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.querySelector('.top-bar').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.querySelector('.top-bar').style.display = '';
+  document.getElementById('listings').style.display = '';
+  document.querySelector('.footnote').style.display = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  if (!email || !pw) { errEl.textContent = '请输入邮箱和密码'; return; }
+
+  btn.disabled = true; btn.textContent = '登录中…'; errEl.textContent = '';
+
+  try {
+    const r = await fetch(AUTH_URL + '/auth', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email, password: pw})
+    });
+    const data = await r.json();
+    if (data.error) {
+      errEl.textContent = data.error;
+    } else {
+      saveAuth(data.token, data.name);
+      showLoading();
+      await load();
+      showApp();
+    }
+  } catch(e) {
+    errEl.textContent = '网络错误，请重试';
+  }
+  btn.disabled = false; btn.textContent = '登 录';
+}
+
+function doLogout() {
+  clearAuth();
+  showLogin();
+}
+
+// Allow Enter key to login
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('loginPw').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+
+// ── Data Loading ──────────────────────────────────────────
+async function load() {
+  const token = getToken();
+  if (!token) { showLogin(); return; }
+
+  try {
+    const r = await fetch(AUTH_URL + '/data?token=' + encodeURIComponent(token));
+    if (r.status === 401) { clearAuth(); showLogin(); return; }
     DATA = await r.json();
+    if (DATA.error) { throw new Error(DATA.error); }
     renderStats();
     renderTags();
     filter();
@@ -314,10 +492,12 @@ function renderStats() {
   const now = new Date();
   const min = Math.floor((now - t) / 60000);
   let ago = min < 1 ? '刚刚' : min < 60 ? min + '分前' : Math.floor(min/60) + '时前';
+  const name = localStorage.getItem(NAME_KEY) || '';
   document.getElementById('statPills').innerHTML =
     `<span class="stat-pill"><b>${DATA.total}</b> 套房源</span>` +
     `<span class="stat-pill">🆕 <b>${DATA.today_new}</b> 今日</span>` +
-    `<span class="stat-pill">${ago}</span>`;
+    `<span class="stat-pill">${ago}</span>` +
+    (name ? `<button class="logout-btn" onclick="doLogout()">👤 ${esc(name)}</button>` : '');
 }
 
 function renderTags() {
@@ -400,7 +580,6 @@ function renderListings(q) {
     let postCls = short ? '' : 'collapsed';
     let postClick = short ? '' : ' onclick="togglePost(this)"';
 
-    // Chips
     let chips = [];
     if (l.type) chips.push(`<span class="chip type-chip">${esc(l.type)}</span>`);
     if (l.property_type) chips.push(`<span class="chip">${esc(l.property_type)}</span>`);
@@ -408,10 +587,8 @@ function renderListings(q) {
     if (l.furnishing) chips.push(`<span class="chip furnish-chip">${esc(l.furnishing)}</span>`);
     if (l.remark) chips.push(`<span class="chip">${esc(l.remark)}</span>`);
 
-    // Rent
     const rent = l.rent ? fmtRent(l.rent) : '';
 
-    // Agent
     const initial = (l.agent || '?')[0];
     let agentHtml = '';
     if (l.agent || l.phone) {
@@ -422,7 +599,6 @@ function renderListings(q) {
         '</div>';
     }
 
-    // Post
     let postHtml = '';
     if (postText) {
       postHtml = '<div class="post-block ' + postCls + '"' + postClick + '>' + esc(postText) + '</div>';
@@ -466,7 +642,17 @@ function togglePost(el) {
   }
 }
 
-load();
+// ── Init ──────────────────────────────────────────────────
+(async function init() {
+  showLoading();
+  const ok = await checkAuth();
+  if (ok) {
+    await load();
+    showApp();
+  } else {
+    showLogin();
+  }
+})();
 </script>
 </body>
 </html>
