@@ -5,3 +5,4 @@ __pycache__/
 .hermes/
 *.log
 .env
+data/rentals.json
