@@ -49,6 +49,27 @@ pip install google-auth google-api-python-client stripe
 
 ## 启动服务
 
+### Auth Server + Cloudflare Tunnel
+
+```bash
+bash auth/start_auth.sh
+```
+
+启动后 HTTPS 隧道 URL 保存在 `/tmp/cf_active_url.txt`。
+
+### WhatsApp Daemon
+
+```bash
+bash wa/start_daemon.sh
+```
+
+### @reboot 自启（已配置）
+
+```bash
+@reboot bash /home/user/jb-rental-intel/auth/start_auth.sh
+@reboot bash /home/user/jb-rental-intel/wa/start_daemon.sh
+```
+
 ### 1. WhatsApp Daemon（必须 24/7 常驻）
 
 ```bash
