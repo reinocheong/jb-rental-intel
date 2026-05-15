@@ -2,7 +2,7 @@
 
 > 项目：Smart Tenancy Pro — JB 房产数据 SaaS  
 > 根目录：`/home/user/jb-rental-intel/`  
-> 最后更新：2026-05-14
+> 最后更新：2026-05-15
 
 ---
 
@@ -145,7 +145,7 @@ Cron 每 30 分钟跑 `scripts/export_rentals_json.py`，仅导出到本地 `dat
 
 - **登录页**：打开 URL 先看到登录页（暗色主题卡片式），输入邮箱+密码
 - **后端**：`auth/auth_server.py`（Python HTTP）验证凭据 → 查内部运营 Sheet「授权用户」tab
-- **隧道**：通过 bore 暴露公网（`bore.pub:44200`）
+- **隧道**：通过 Cloudflare Tunnel 暴露公网 HTTPS
 - **Token**：24h 有效，存 localStorage，登录后无需重复输入
 - **用户管理**：在内部运营 Sheet →「授权用户」tab 加行即可
 
@@ -309,6 +309,40 @@ tail -f .logs/wa_daemon.log
 
 ---
 
+## 数据清洗工具
+
+### 电话号格式化
+
+```bash
+cd /home/user/jb-rental-intel
+
+# 干跑（预览变更）
+python3 scripts/clean_phones.py
+
+# 写入 Sheet
+python3 scripts/clean_phones.py --apply
+```
+
+一次性清洗（2026-05-14）：471 → +60 国际格式，6 格无效号清空。
+Parser 已集成 `normalize_phone()`，新数据自动标准。
+
+### 楼盘名标准化
+
+```bash
+cd /home/user/jb-rental-intel
+
+# 干跑
+python3 scripts/clean_property_names.py
+
+# 写入 Sheet
+python3 scripts/clean_property_names.py --apply
+```
+
+一次性清洗（2026-05-14）：391 → 218 独特值，301 行无楼盘名清空。
+Parser 已集成 `normalize_property_name()` + `_is_valid_property_name()`，新数据自动标准。
+
+---
+
 ## 故障排查
 
 | 症状 | 可能原因 | 解决 |
@@ -323,9 +357,9 @@ tail -f .logs/wa_daemon.log
 | Post Text 全是 FB 界面噪音 | 旧版 clean_post_text 不够强 | 已重写，新帖自动干净；旧数据跑 `python3 /tmp/clean_batch.py` |
 | Agent 名是随机英文（ThrillingGrapefruit） | FB 给匿名用户生成的显示名 | fb_extract.js 自动检测并替换为真实姓名；已有数据跑清理脚本 |
 | Rent 列为空但帖文有价格 | ① 价格被清洗函数吃掉 ② MYR 不被识别 | 已修：提取前先读 raw text + 支持 MYR；回填脚本见 /tmp/backfill_v2.py |
+| Phone 列格式混乱 | ① 旧数据未清洗 ② 新帖 Parser 未规范化 | ① `python3 scripts/clean_phones.py` ② Parser 已集成（2026-05-14） |
 | Sheet 美化后想还原 | 格式太花/不合口味 | `python3 scripts/reset_sheet_format.py` 一键清回裸数据 |
-| rentals.html 登录报错 | auth_server 或 bore 挂了 | `bash auth/start_auth.sh` 重启，检查 `curl bore.pub:44200/health` |
-| bore 隧道端口被占 | 44200 被其他 bore 用户占用 | 改 `rentals.html` 中 `AUTH_URL` + `start_tunnel.sh` 中 `--port` |
+| rentals.html 登录报错 | auth_server 或 Cloudflare Tunnel 挂了 | `bash auth/start_auth.sh` 重启，检查 `curl .../health` |
 
 ---
 
@@ -335,7 +369,9 @@ tail -f .logs/wa_daemon.log
 |------|------|------|
 | Sheet 美化 | `scripts/beautify_sheet.py` | 格式化 Sheet（冻结、斑马纹、条件颜色、列宽） |
 | Sheet 还原 | `scripts/reset_sheet_format.py` | 清除所有格式，回到裸数据 |
+| 电话号清洗 | `scripts/clean_phones.py` | 一次性清洗 Phone 列 → +60 国际格式 |
+| 楼盘名清洗 | `scripts/clean_property_names.py` | 一次性标准化 Property Name + 去垃圾 |
 | 租金回填 | `/tmp/backfill_v2.py` | 从 raw JSON 补填空租金（一次性的） |
 | Agent 名清理 | `/tmp/clean_agent_only.py` | 清掉FB随机用户名（一次性的） |
-| 🔐 Auth 服务 | `auth/start_auth.sh` | 启动 auth_server + bore 隧道（@reboot cron） |
+| 🔐 Auth 服务 | `auth/start_auth.sh` | 启动 auth_server + Cloudflare Tunnel（@reboot cron） |
 | 🔐 手动登录测试 | 打开 `https://reinocheong.github.io/jb-rental-intel/rentals.html` | 测试用户: test@example.com / test123 |
