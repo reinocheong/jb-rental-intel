@@ -117,8 +117,16 @@ python3 scripts/export_rentals_json.py
 
 ### 自动更新（每30分钟）
 
-Cron 每 30 分钟跑 `scripts/export_rentals_json.py` → git push。
-GitHub Pages 自动部署 → `https://reinocheong.github.io/jb-rental-intel/rentals.html` 总是最新数据。
+Cron 每 30 分钟跑 `scripts/export_rentals_json.py`，仅导出到本地 `data/rentals.json`（不再公开推送）。
+数据通过 auth_server 按需提供 — 用户登录后动态获取。
+
+### 登录机制（2026-05-15 新增）
+
+- **登录页**：打开 URL 先看到登录页（暗色主题卡片式），输入邮箱+密码
+- **后端**：`auth/auth_server.py`（Python HTTP）验证凭据 → 查内部运营 Sheet「授权用户」tab
+- **隧道**：通过 bore 暴露公网（`bore.pub:44200`）
+- **Token**：24h 有效，存 localStorage，登录后无需重复输入
+- **用户管理**：在内部运营 Sheet →「授权用户」tab 加行即可
 
 ### 页面特性
 - 手机端卡片式布局，纯上下滑动，零横向滚动
@@ -295,6 +303,8 @@ tail -f .logs/wa_daemon.log
 | Agent 名是随机英文（ThrillingGrapefruit） | FB 给匿名用户生成的显示名 | fb_extract.js 自动检测并替换为真实姓名；已有数据跑清理脚本 |
 | Rent 列为空但帖文有价格 | ① 价格被清洗函数吃掉 ② MYR 不被识别 | 已修：提取前先读 raw text + 支持 MYR；回填脚本见 /tmp/backfill_v2.py |
 | Sheet 美化后想还原 | 格式太花/不合口味 | `python3 scripts/reset_sheet_format.py` 一键清回裸数据 |
+| rentals.html 登录报错 | auth_server 或 bore 挂了 | `bash auth/start_auth.sh` 重启，检查 `curl bore.pub:44200/health` |
+| bore 隧道端口被占 | 44200 被其他 bore 用户占用 | 改 `rentals.html` 中 `AUTH_URL` + `start_tunnel.sh` 中 `--port` |
 
 ---
 
@@ -306,3 +316,5 @@ tail -f .logs/wa_daemon.log
 | Sheet 还原 | `scripts/reset_sheet_format.py` | 清除所有格式，回到裸数据 |
 | 租金回填 | `/tmp/backfill_v2.py` | 从 raw JSON 补填空租金（一次性的） |
 | Agent 名清理 | `/tmp/clean_agent_only.py` | 清掉FB随机用户名（一次性的） |
+| 🔐 Auth 服务 | `auth/start_auth.sh` | 启动 auth_server + bore 隧道（@reboot cron） |
+| 🔐 手动登录测试 | 打开 `https://reinocheong.github.io/jb-rental-intel/rentals.html` | 测试用户: test@example.com / test123 |
