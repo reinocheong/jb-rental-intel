@@ -163,62 +163,288 @@ HEADERS = [
 ]
 
 # ----- Property names (common JB developments) -----
+# 格式：[匹配关键字, ...]
+# 匹配时大小写不敏感，输出用 canonical 形式
 KNOWN_PROPERTIES = [
-    "大学城", "Taman Universiti",
-    "Mutiara Rini", "mutiara rini",
-    "Nusa Sentral", "nusa sentral",
-    "Sks Pavilion", "sks pavilion",
-    "KSL Resident", "ksl resident",
-    "KSL D'Inspire", "D Inspire", "D'Inspire",
-    "Trellis Residence", "trellis",
-    "R&F", "RNF", "rnf", "R and F",
-    "Danga Bay", "danga bay",
-    "Country Garden", "country garden",
-    "碧桂园",
-    "V Summer", "v summer",
-    "TriTower", "tritower", "Tri Tower",
-    "Twin Galaxy", "twin galaxy",
-    "Sky Executive", "sky executive",
-    "Suasana", "suasana",
-    "Paragon Suites", "paragon suites", "Paragon",
-    "The Platino", "the platino", "Platino",
-    "Meridin", "meridin",
-    "Mah Sing", "mah sing",
-    "Greenland", "greenland",
-    "Forest City", "forest city",
-    "彩虹", "Pelangi", "pelangi",
-    "Desa Harmoni", "desa harmoni",
-    "Johor Jaya", "johor jaya",
-    "Setia Tropika", "setia tropika",
-    "Bukit Indah", "bukit indah",
-    "Taman Daya", "taman daya",
-    "Taman Molek", "taman molek",
-    "Taman Perling", "taman perling",
-    "Taman Sentosa", "taman sentosa",
-    "Taman Pelangi", "taman pelangi",
+    # ── 高层/公寓 ──
+    "R&F Princess Cove", "R&F", "RNF", "R and F", "Princess Cove",
+    "Tri Tower", "Tritower",
+    "Trellis Residence", "Trellis",
+    "Paragon Residences", "Paragon Suites", "Paragon",
+    "SKS Pavilion", "SKS Pavillion",
+    "Country Garden", "碧桂园",
+    "KSL Residence", "KSL Resident", "KSL D'Inspire", "D'Inspire",
+    "Danga Bay",
+    "Twin Tower", "Twin Galaxy",
+    "Palazio Apartment", "Palazio",
+    "Surimas Suites", "Surimas",
+    "One49 Residence",
+    "Tropez Residence", "Tropez",
+    "Sky 88", "Sky88",
+    "The Platino", "Platino",
+    "Meridin Medini", "Meridin",
+    "Bayu Marina", "Bayu Puteri",
+    "V Summer",
+    "Suasana Suites", "Suasana",
+    "Forest City",
+    "Summit Residence", "Summit",
+    "Wateredge Residence", "Wateredge",
+    "Pan Vista Apartment", "Pan Vista",
+    "Tebrau City Residence", "Tebrau City",
+    "Season Larkin Apartment", "Season Larkin", "Season Apartment",
+    "Botanika",
+    "Epic Residence",
+    "Sunway Grid Residence", "Sunway Grid",
+    "Aloha Tower",
+    "The Aliff Residence", "Aliff Residence",
+    "Akasa Condo", "Akasa",
+    "Ambience Residence",
+    "Dwi Mahkota Condo",
+    "G Residence",
+    "The Garden Residence", "Garden Residence",
+    "Havona",
+    "Marina Residence", "Marina Apartment",
+    "Molek Regency",
+    "Park Avenue Apartment",
+    "Permas Ville Apartment",
+    "The Raffles Suites",
+    "Rich Apartment",
+    "Senibong Villa",
+    "Seri Mutiara Apartment",
+    "The Straits View Condo", "Straits View Condo",
+    "Veranda Residence",
+    "Bora Residence",
+    "Skudai Villa",
+    "Bukit Impian Residence",
+    "Centra Residence",
+    "1 Tebrau Residence",
+    "The Aliff",
+    # ── Taman 系列 ──
+    "Taman Universiti", "大学城",
+    "Taman Pelangi", "Pelangi", "彩虹",
+    "Taman Molek",
+    "Taman Daya",
+    "Taman Perling", "Perling",
+    "Taman Sentosa",
     "Taman Johor Jaya",
-    "Taman Ungku Tun Aminah", "taman ungku tun aminah",
-    "Tampoi", "tampoi",
-    "Larkin", "larkin",
-    "Permas Jaya", "permas jaya",
-    "Mount Austin", "mount austin",
+    "Taman Setia Indah",
+    "Taman Puteri Wangsa",
+    "Taman Iskandar",
+    "Taman Century",
+    "Taman Gaya",
+    "Taman Desa Jaya",
+    "Taman Megah Ria",
+    "Taman Kempas Indah",
+    "Taman Bukit Kempas",
+    "Taman Laguna",
+    "Taman Scientex",
+    "Taman Sierra Perdana",
+    "Taman Suria",
+    "Taman Tasek",
+    "Taman Melodies",
+    "Taman Abad",
+    "Taman Adda Height",
+    "Taman Gembira",
+    "Taman Ungku Tun Aminah",
+    "Taman JP Perdana",
+    "Taman Perumahan Rakyat Lima Kedai",
+    # ── 区域/城镇 ──
+    "Johor Jaya",
+    "Mount Austin",
     "Austin Heights",
-    "Eco Botanic", "eco botanic",
-    "Medini", "medini",
+    "Setia Tropika",
+    "Bukit Indah",
+    "Gelang Patah",
     "Iskandar Puteri",
-    "Gelang Patah", "gelang patah",
-    "Kulai", "kulai",
-    "Senai", "senai",
-    "Skudai", "skudai",
-    "Impian Emas", "impian emas",
-    "Horizon Hills", "horizon hills",
-    "Taman Sutera", "taman sutera",
-    "Sutera Utama",
-    "Taman Gaya", "taman gaya",
-    "Desa Tebrau", "desa tebrau",
+    "Eco Botanic",
+    "Eco Summer",
+    "Eco Business Park 1",
+    "Desa Tebrau",
+    "Desa Harmoni",
+    "Kangkar Tebrau",
+    "Mutiara Rini",
+    "Nusa Sentral",
+    "Nusa Bestari",
+    "Impian Emas",
+    "Permas Jaya", "百万镇",
+    "Johor Bahru",
+    "Bandar Dato Onn",
+    "Skudai",
+    "Kulai",
+    "Senai",
+    "Larkin",
+    "Tampoi",
+    "Kempas",
+    "Masai",
+    "Pasir Gudang",
     "Tebrau",
-    "Kangkar Tebrau", "kangkar tebrau",
+    "Tuas",
+    "Medini",
+    "Sutera Utama",
+    "Jalan Hang Tuat",
+    "Jalan Raja Udang",
+    "Jalan Abdul Samad",
+    "Mid Valley Southkey",
+    "South Key Mosaic",
+    "CIQ",
+    "Kota Masai",
+    "Tiram",
 ]
+
+# ── 标准化映射：任意变体 → canonical 名称 ──
+PROPERTY_NORMALIZE = {
+    # R&F
+    "r&f": "R&F Princess Cove", "rnf": "R&F Princess Cove",
+    "r and f": "R&F Princess Cove", "princess cove": "R&F Princess Cove",
+    # Tri Tower
+    "tritower": "Tri Tower", "tri tower": "Tri Tower",
+    # Trellis
+    "trellis residence": "Trellis Residence", "trellis": "Trellis Residence",
+    "trellis residensi": "Trellis Residence",
+    # Paragon
+    "paragon suites": "Paragon Residences", "paragon residence": "Paragon Residences",
+    "paragon": "Paragon Residences",
+    # SKS
+    "sks pavillion": "SKS Pavilion", "sks pavillion residence": "SKS Pavilion",
+    "sks pavilion": "SKS Pavilion",
+    # KSL
+    "ksl residence": "KSL Residence", "ksl resident": "KSL Residence",
+    "ksl d'inspire": "KSL D'Inspire", "d'inspire": "KSL D'Inspire",
+    # Country Garden
+    "country garden": "Country Garden", "碧桂园": "Country Garden",
+    # Twin
+    "twin tower": "Twin Tower", "twin galaxy": "Twin Galaxy",
+    # Others
+    "palazio": "Palazio Apartment", "palazio apartment": "Palazio Apartment",
+    "surimas": "Surimas Suites", "surimas suites": "Surimas Suites",
+    "one49": "One49 Residence", "one49 residence": "One49 Residence",
+    "tropez": "Tropez Residence", "tropez residence": "Tropez Residence",
+    "sky 88": "Sky 88", "sky88": "Sky 88",
+    "platino": "The Platino", "the platino": "The Platino",
+    "meridin": "Meridin Medini", "meridin medini": "Meridin Medini",
+    "bayu marina": "Bayu Marina", "bayu puteri": "Bayu Puteri",
+    "v summer": "V Summer", "suasana": "Suasana Suites",
+    "forest city": "Forest City",
+    "summit": "Summit Residence", "summit residence": "Summit Residence",
+    "wateredge": "Wateredge Residence",
+    "pan vista": "Pan Vista Apartment",
+    # Areas
+    "pelangi": "Taman Pelangi", "彩虹": "Taman Pelangi",
+    "大学城": "Taman Universiti", "taman universiti": "Taman Universiti",
+    "bukit indah": "Bukit Indah", "johor jaya": "Johor Jaya",
+    "mount austin": "Mount Austin", "setia tropika": "Setia Tropika",
+    "gelang patah": "Gelang Patah", "iskandar puteri": "Iskandar Puteri",
+    "desa tebrau": "Desa Tebrau", "mutiara rini": "Mutiara Rini",
+    "nusa sentral": "Nusa Sentral", "permas jaya": "Permas Jaya",
+    "百万镇": "Permas Jaya", "skudai": "Skudai", "kulai": "Kulai",
+    "senai": "Senai", "larkin": "Larkin", "tampoi": "Tampoi",
+    "tebrau": "Tebrau", "medini": "Medini", "perling": "Taman Perling",
+    "tuas": "Tuas", "pasir gudang": "Pasir Gudang",
+    "kota masai": "Kota Masai",
+}
+
+# ── 垃圾关键词黑名单：匹配到则拒绝整个提取结果 ──
+PROPERTY_NAME_BLACKLIST = {
+    # 人名常见后缀
+    'chong', 'lee', 'goh', 'loh', 'tan', 'wong', 'lim', 'chen', 'pong',
+    'koh', 'lye', 'loo', 'liew', 'teo', 'ng', 'foo', 'chan', 'yap',
+    'chin', 'sia', 'tee', 'ooi', 'seng',
+    # 属性
+    'for rent', 'for sale', '出租', '出售', '房间出租',
+    'fully furnished', 'partial furnished', 'unfurnished', 'full furnish',
+    'master room', 'master bedroom', 'common room', 'middle room',
+    'small room', 'balcony room', 'single storey', 'double storey',
+    'wifi', 'unifi', 'deposit', 'freehold', 'leasehold', 'bumi lot',
+    'guarded', 'gated', 'food court', 'living hall', 'toilet',
+    'bathroom', 'bedroom', 'high floor', 'nice view', 'smart lock',
+    'internet included', 'utilities included', 'ce floor',
+    # FB 噪音
+    'real estate', 'whatsapp', 'please contact', 'call or',
+    'no agent', '不要中介', 'teamgather', 'roof realty',
+    'properties sdn bhd', 'stabilisation', 'submaster',
+    'untuk dijual', 'brand new', 'new launch', 'new unit',
+    'end lot', 'intermediate lot', 'land size',
+    'xiao hong shu', 'xiaohongshu',
+    # 杂项
+    'residences', 'service apartment', 'jbcondo', 'ciq room for rent',
+    'need room', 'looking for', 'walk to ksl', 'rts',
+}
+
+def normalize_property_name(raw_name):
+    """标准化楼盘名。返回 canonical 名称，若无法识别则返回原值。"""
+    if not raw_name or not raw_name.strip():
+        return ""
+    
+    name = raw_name.strip()
+    key = name.lower().strip().rstrip('.').replace('  ', ' ')
+    
+    # ── 查标准化映射 ──
+    if key in PROPERTY_NORMALIZE:
+        return PROPERTY_NORMALIZE[key]
+    
+    # ── 去掉价格后缀再查 ──
+    clean = re.sub(r'\s*(?:RM|rm)\s*\d[\d,.]*', '', key).strip()
+    if clean and clean != key and clean in PROPERTY_NORMALIZE:
+        return PROPERTY_NORMALIZE[clean]
+    
+    # ── 简单 title case（保留中文） ──
+    if re.search(r'[\u4e00-\u9fff]', name):
+        return name
+    
+    # Smart title
+    fixed = name.title()
+    # 修复常见缩写
+    for abbr in ['JB', 'CIQ', 'KSL', 'SKS', 'R&F', 'RNF', 'MYR', 'Wi-Fi', "D'Inspire"]:
+        fixed = re.sub(r'\b' + re.escape(abbr.lower()) + r'\b', abbr, fixed, flags=re.IGNORECASE)
+    
+    return fixed
+
+
+def _is_valid_property_name(name):
+    """拒绝明显的垃圾：人名、价格、属性描述。"""
+    if not name or len(name) < 2:
+        return False
+    
+    key = name.lower().strip()
+    
+    # 精确命中黑名单
+    if key in PROPERTY_NAME_BLACKLIST:
+        return False
+    
+    # 部分命中黑名单（至少 4 字符才判断，避免误杀短名）
+    for bw in PROPERTY_NAME_BLACKLIST:
+        if len(bw) >= 4 and bw in key:
+            return False
+    
+    # 纯价格模式
+    if re.match(r'^(?:RM|rm)\s*\d[\d,.]*$', name):
+        return False
+    
+    # 纯数字
+    if re.match(r'^\d+$', name):
+        return False
+    
+    # 人名模式：首字母大写 + 常见姓
+    if re.match(r'^[A-Z][a-z]+\s+(?:Chong|Lee|Goh|Loh|Tan|Wong|Lim|Chen)$', name):
+        return False
+    
+    # 全大写缩写 ≥ 3 字母（CC、REN、D75、HGM、TRR...）
+    if re.match(r'^[A-Z0-9]{3,}$', name):
+        return False
+    
+    # 全大写字母+空格模式: "CC CHUNG", "DK PROPERTY"
+    if re.match(r'^[A-Z]{2,4}\s+[A-Z]{3,}$', name):
+        return False
+    
+    # 全大写字母+数字模式: "REN69697"
+    if re.match(r'^[A-Z]{2,4}\d{3,}', name):
+        return False
+    
+    # 以 "FOR RENT" / "For Sale" 开头
+    if re.match(r'^(?:FOR|For)\s+(?:RENT|SALE)', name):
+        return False
+    
+    return True
 
 
 def extract_listing_type(text):
@@ -264,46 +490,63 @@ def extract_listing_type(text):
     return '出租'
 
 def extract_property_name(text):
-    """Extract property location/name from post text."""
+    """Extract property location/name from post text.
+    所有返回结果都经过 normalize_property_name() 标准化。"""
     text_lower = text.lower()
     
-    # Blacklist: phrases that are NOT property names
-    BLACKLIST = {'ciq room for rent', 'ciq', 'for rent', 'room for rent', 
-                 '房间出租', '出租', '找房', '正在找房', '第二通道',
-                 'single storey', 'double storey', 'studio unit'}
+    # ── Agent name blacklist for Pattern 2 ──
+    # 如果匹配到的词是常见人名，跳过
+    _agent_first_names = {
+        'angela', 'crystal', 'jacelyn', 'sally', 'sandra', 'jac', 'kedy',
+        'jeddy', 'eugene', 'janet', 'jessrene', 'jess', 'esther', 'nicole',
+        'diane', 'puyol', 'yuxiu', 'jeny', 'ebby', 'jia hui', 'jia xin',
+        'qian han', 'yu ern', 'yoklen', 'keith', 'kent', 'fionna', 'vincy',
+        'kenny', 'benjamin', 'tommy', 'brandon', 'darren', 'chew', 'yii',
+        'yeow', 'mei', 'ling', 'royce', 'soh', 'hui jing', 'elaine', 'alice',
+        'ivan', 'song', 'well', 'cheksiang', 'molly', 'ervin', 'adeline',
+        'yi yi', 'bibi', 'cindle', 'jie', 'wan', 'sukky', 'joe', 'peace',
+        'ke', 'bright', 'may', 'bee', 'beng', 'jane', 'jason', 'joyce',
+        'john', 'ck', 'day', 'jocelyn', 'yong', 'long', 'mystical',
+        'sabrina', 'dawn', 'four', 'anne', 'ost', 'matthew', 'lim',
+        'sim', 'yvonne', 'kc',
+    }
     
     def is_valid_name(name):
         if not name or len(name) < 2:
             return False
-        return name.lower().strip() not in BLACKLIST
+        key = name.lower().strip()
+        # 检查是否为人名
+        if key in _agent_first_names:
+            return False
+        return True
 
     # Pattern 1: Explicit "地点：XXX" / "Location: XXX"
     m = re.search(r'(?:地点|location)\s*[：:]\s*([^（(\n，,]{2,40})', text, re.IGNORECASE)
     if m:
         name = m.group(1).strip()
         if is_valid_name(name):
-            return name
+            return normalize_property_name(name)
 
     # Pattern 2: Capitalized name before parentheses: "V Summer(走路"
+    # Fixed: skip if match is an agent first name
     m = re.search(r'([A-Z][a-zA-Z0-9\s\-]{2,30}?)(?:[（(])', text)
     if m:
         name = m.group(1).strip()
         if re.search(r'[A-Z]', name) and len(name) >= 3 and is_valid_name(name):
-            return name
+            return normalize_property_name(name)
 
-    # Pattern 3: "XXX Residence/Apartment/Condo/Residensi" 
-    m = re.search(r'([A-Za-z0-9\s\-]{2,30}?)\s*(?:Residence|Residensi|Apartment|Condo|Resort|Tower|Villa|Court|Suites)', text, re.IGNORECASE)
+    # Pattern 3: "XXX Residence/Apartment/Condo/Residensi/Tower/Villa/Court/Suites"
+    # Fixed: require the word before suffix to start with capital letter (not "Fully Furnished")
+    m = re.search(r'([A-Z][A-Za-z0-9\s\-]{2,30}?)\s*(?:Residence|Residensi|Apartment|Condo|Resort|Tower|Villa|Court|Suites)', text, re.IGNORECASE)
     if m:
         name = m.group(0).strip()
-        if len(name) >= 3 and is_valid_name(name):
-            return name
+        if len(name) >= 3 and is_valid_name(name) and not name.lower().startswith(('fully', 'partial', 'semi', 'un')):
+            return normalize_property_name(name)
 
-    # Pattern 4: Check known properties
+    # Pattern 4: Check known properties (use new expanded list)
     for prop in KNOWN_PROPERTIES:
         if prop.lower() in text_lower:
-            if prop[0].isupper():
-                return prop
-            return prop.title()
+            return normalize_property_name(prop)
 
     # Pattern 5: Generic address patterns
     addr_patterns = [
@@ -313,7 +556,8 @@ def extract_property_name(text):
     for pat in addr_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
-            return m.group(0).strip()
+            raw = m.group(0).strip()
+            return normalize_property_name(raw)
 
     return ""
 
@@ -548,6 +792,9 @@ def parse_post(post):
             agent = ''
 
     prop_name = extract_property_name(text)
+    # Final validation: reject if normalize still produces garbage
+    if prop_name and not _is_valid_property_name(prop_name):
+        prop_name = ""
     listing_type = extract_listing_type(text)
     prop_type = extract_property_type(text)
     rooms = extract_rooms(text)
