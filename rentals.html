@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>JB Rentals</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #020617;
@@ -306,6 +307,15 @@
     }
     .login-btn:active { opacity: 0.8; }
     .login-btn:disabled { opacity: 0.4; }
+    .login-sep {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin: 0.8rem 0;
+      color: var(--text-muted); font-size: 0.65rem;
+    }
+    .login-sep::before, .login-sep::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
     .login-error {
       font-size: 0.68rem; color: #f87171;
       margin-top: 0.5rem; min-height: 1.2em;
@@ -352,6 +362,10 @@
     <input class="login-field" type="email" id="loginEmail" placeholder="📧 邮箱" autocomplete="email">
     <input class="login-field" type="password" id="loginPw" placeholder="🔒 密码" autocomplete="current-password">
     <button class="login-btn" id="loginBtn" onclick="doLogin()">登 录</button>
+    <div class="login-sep">
+      <span>或</span>
+    </div>
+    <div id="googleBtn"></div>
     <div class="login-error" id="loginError"></div>
     <div class="login-foot">没有账号？联系客服开通<br>smarttenancypro@gmail.com</div>
   </div>
@@ -375,6 +389,7 @@
 <script>
 // ── Auth Config ───────────────────────────────────────────
 const AUTH_URL = 'http://bore.pub:44200';
+const GOOGLE_CLIENT_ID = '788231638010-v1k56qso1brtia2u9ddqghbbpes4pkm9.apps.googleusercontent.com';
 const TOKEN_KEY = 'jb_rentals_token';
 const NAME_KEY = 'jb_rentals_name';
 
@@ -458,8 +473,63 @@ async function doLogin() {
 }
 
 function doLogout() {
+  // Also revoke Google session if applicable
+  if (window.google && google.accounts) {
+    google.accounts.id.disableAutoSelect();
+  }
   clearAuth();
   showLogin();
+  initGoogleSignIn();
+}
+
+// ── Google Sign-In ────────────────────────────────────────
+function initGoogleSignIn() {
+  const btnEl = document.getElementById('googleBtn');
+  if (!btnEl) return;
+  if (!window.google) {
+    // Google SDK not loaded yet, retry
+    setTimeout(initGoogleSignIn, 500);
+    return;
+  }
+  btnEl.innerHTML = '';
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+    auto_select: false,
+    use_fedcm_for_button: true,
+  });
+  google.accounts.id.renderButton(btnEl, {
+    type: 'standard',
+    theme: 'filled_black',
+    size: 'large',
+    text: 'signin_with',
+    shape: 'rectangular',
+    width: btnEl.parentElement.offsetWidth - 48 || 280,
+  });
+}
+
+async function handleGoogleLogin(response) {
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  try {
+    const r = await fetch(AUTH_URL + '/google-auth', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({google_token: response.credential})
+    });
+    const data = await r.json();
+    if (data.error) {
+      errEl.textContent = data.error;
+    } else {
+      saveAuth(data.token, data.name);
+      showLoading();
+      await load();
+      showApp();
+    }
+  } catch(e) {
+    errEl.textContent = '网络错误，请重试';
+  }
 }
 
 // Allow Enter key to login
@@ -651,6 +721,7 @@ function togglePost(el) {
     showApp();
   } else {
     showLogin();
+    initGoogleSignIn();
   }
 })();
 </script>

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
 JB Rentals Auth Server — 微型 HTTP 服务器
-提供登录验证和数据接口，用 Google Sheets 做用户数据库。
+支持邮箱+密码登录 和 Google OAuth 登录。
+Google 登录自动开通 3 天试用。
 
 端点：
-  POST /auth     → {email, password} → {token, name} 或 {error}
-  GET  /data     → ?token=xxx → 房源 JSON 或 {error}
-  GET  /health   → 健康检查
+  POST /auth         → {email, password} → {token, name}
+  POST /google-auth  → {google_token}    → {token, name, is_new}
+  GET  /data         → ?token=xxx → 房源 JSON
+  GET  /health       → 健康检查
 """
-import json, hashlib, secrets, os, sys
+import json, hashlib, secrets, os, sys, urllib.request
 from datetime import datetime, timezone, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
@@ -16,8 +18,11 @@ from urllib.parse import urlparse, parse_qs
 # ── 配置 ─────────────────────────────────────────────────
 INTERNAL_SHEET_ID = '1gCynpcBHYgoGiRkfVOJOCOjtiOIl0NuGgpyEexAF3W4'
 RENTALS_SHEET_ID  = '1QgWjlUEvFf9auZzptbYI2EEDAeWnKAZcxsXhcCgjJYM'
+SUB_SHEET_ID      = '1zLOyuRbZnycvD0tc4UPLSoR3mfClwkiDOPw3W-v-gXg'
 SA_KEY = '/home/user/.hermes/google_sa_rental.json'
+GOOGLE_CLIENT_ID = '788231638010-v1k56qso1brtia2u9ddqghbbpes4pkm9.apps.googleusercontent.com'
 TOKEN_TTL_HOURS = 24
+TRIAL_DAYS = 3
 PORT = int(os.environ.get('PORT', 8777))
 
 # ── Google Sheets ────────────────────────────────────────
@@ -48,41 +53,135 @@ def sha256(s):
 def gen_token():
     return secrets.token_urlsafe(36)
 
-# ── 登录验证 ─────────────────────────────────────────────
-def verify_login(email, password):
+def log(msg):
+    sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}\n")
+
+# ── Google Token 验证 ────────────────────────────────────
+def verify_google_id_token(google_token):
+    """验证 Google ID token，返回 {email, name, picture} 或 None"""
+    try:
+        url = f'https://oauth2.googleapis.com/tokeninfo?id_token={google_token}'
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+            # Verify audience
+            if data.get('aud') != GOOGLE_CLIENT_ID:
+                log(f"Google token audience mismatch: {data.get('aud')}")
+                return None
+            return {
+                'email': data.get('email', '').lower(),
+                'name': data.get('name', ''),
+                'picture': data.get('picture', ''),
+            }
+    except Exception as e:
+        log(f"Google token verification failed: {e}")
+        return None
+
+# ── 用户管理 ─────────────────────────────────────────────
+def find_user(email):
+    """在 授权用户 Sheet 中查找用户，返回 (row_data, row_index) 或 (None, -1)"""
     email = email.strip().lower()
     rows = read_sheet(INTERNAL_SHEET_ID, '授权用户!A:F')
-    for row in rows[1:]:
-        if len(row) < 5: continue
-        row_email = (row[0] or '').strip().lower()
-        if row_email != email: continue
+    for i, row in enumerate(rows[1:], start=1):
+        if len(row) < 5:
+            continue
+        if (row[0] or '').strip().lower() == email:
+            return row, i
+    return None, -1
 
-        stored_hash = (row[1] or '').strip()
-        name = (row[2] or email).strip()
-        status = (row[4] or '').strip()
-        expiry_str = (row[3] or '').strip()
+def check_user_status(row):
+    """检查用户状态，返回 (is_ok, error_msg)"""
+    status = (row[4] or '').strip()
+    expiry_str = (row[3] or '').strip()
 
-        if status != 'active':
-            return None, '账号已停用，请联系客服'
-        if expiry_str:
-            try:
-                expiry = datetime.fromisoformat(expiry_str)
-                if expiry < datetime.now():
-                    return None, '账号已过期，请联系续费'
-            except: pass
+    if status != 'active':
+        if status == 'expired':
+            return False, '试用已到期，请续费订阅'
+        return False, '账号已停用，请联系客服'
 
-        if sha256(password) != stored_hash:
-            return None, '密码错误'
+    if expiry_str:
+        try:
+            expiry = datetime.fromisoformat(expiry_str)
+            if expiry < datetime.now():
+                return False, '试用已到期，请续费订阅'
+        except:
+            pass
 
-        # Generate session token
-        token = gen_token()
-        now = datetime.now().isoformat()
-        expires = (datetime.now() + timedelta(hours=TOKEN_TTL_HOURS)).isoformat()
-        append_row(INTERNAL_SHEET_ID, '登录会话!A:D',
-                   [token, email, now, expires])
-        return {'token': token, 'name': name, 'expires': expires}, None
+    return True, None
 
-    return None, '邮箱未授权，请联系客服开通'
+def auto_create_trial(email, name):
+    """自动开通 3 天试用，写入 Sheets"""
+    now = datetime.now()
+    start_str = now.strftime('%Y-%m-%d %H:%M')
+    expiry = now + timedelta(days=TRIAL_DAYS)
+    expiry_str = expiry.strftime('%Y-%m-%d %H:%M')
+    expiry_iso = expiry.isoformat()
+
+    # 1. 授权用户 Sheet（无密码列，Google 登录不需要密码）
+    append_row(INTERNAL_SHEET_ID, '授权用户!A:F',
+               [email, 'google', name, expiry_iso, 'active', 'Google 自动开通'])
+
+    # 2. 订阅状态 Sheet
+    append_row(SUB_SHEET_ID, '订阅状态!A:G',
+               [name, email, '', 'standard', start_str, expiry_str, '🟡 试用中'])
+
+    log(f"Auto-created trial for {email} ({name})")
+
+def create_session(email, name):
+    """创建登录会话，返回 token"""
+    token = gen_token()
+    now = datetime.now().isoformat()
+    expires = (datetime.now() + timedelta(hours=TOKEN_TTL_HOURS)).isoformat()
+    append_row(INTERNAL_SHEET_ID, '登录会话!A:D',
+               [token, email, now, expires])
+    return token, expires
+
+# ── 邮箱+密码登录 ─────────────────────────────────────────
+def verify_login(email, password):
+    row, _ = find_user(email)
+    if not row:
+        return None, '邮箱未授权，请联系客服开通'
+
+    stored_hash = (row[1] or '').strip()
+    if stored_hash == 'google':
+        return None, '此账号使用 Google 登录，请点击 Google 按钮'
+
+    name = (row[2] or email).strip()
+    ok, err = check_user_status(row)
+    if not ok:
+        return None, err
+
+    if sha256(password) != stored_hash:
+        return None, '密码错误'
+
+    token, expires = create_session(email, name)
+    return {'token': token, 'name': name, 'expires': expires}, None
+
+# ── Google 登录 ──────────────────────────────────────────
+def verify_google_login(google_token):
+    """Google 登录，首次自动开通试用"""
+    profile = verify_google_id_token(google_token)
+    if not profile:
+        return None, 'Google 验证失败，请重试'
+
+    email = profile['email']
+    name = profile['name']
+
+    row, _ = find_user(email)
+
+    if row:
+        # 已有账号
+        ok, err = check_user_status(row)
+        if not ok:
+            return None, err
+        is_new = False
+    else:
+        # 首次登录 → 自动开通试用
+        auto_create_trial(email, name)
+        is_new = True
+
+    token, expires = create_session(email, name)
+    return {'token': token, 'name': name, 'expires': expires, 'is_new': is_new}, None
 
 # ── Token 验证 ───────────────────────────────────────────
 def validate_token(token):
@@ -96,6 +195,16 @@ def validate_token(token):
                 return True
         except: pass
     return False
+
+def get_user_status(email):
+    """获取用户到期信息，用于页面展示"""
+    row, _ = find_user(email)
+    if not row:
+        return None
+    name = (row[2] or email).strip()
+    expiry_str = (row[3] or '').strip()
+    status = (row[4] or '').strip()
+    return {'name': name, 'expires': expiry_str, 'status': status}
 
 # ── 房源数据 ─────────────────────────────────────────────
 def get_rentals_data():
@@ -199,21 +308,52 @@ class AuthHandler(BaseHTTPRequestHandler):
             data = get_rentals_data()
             self._json(data)
 
+        elif parsed.path == '/status':
+            token = (qs.get('token', [''])[0]).strip()
+            if not token:
+                self._json({'error': '缺少 token'}, 401)
+                return
+            if not validate_token(token):
+                self._json({'error': '登录已过期'}, 401)
+                return
+            # Find email from session
+            rows = read_sheet(INTERNAL_SHEET_ID, '登录会话!A:D')
+            email = ''
+            for row in rows[1:]:
+                if row[0] == token:
+                    email = row[1]
+                    break
+            if email:
+                status = get_user_status(email)
+                self._json(status or {'error': '未找到用户'})
+            else:
+                self._json({'error': '未找到用户'})
+
         else:
             self._json({'error': 'Not found'}, 404)
 
     def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = json.loads(self.rfile.read(length)) if length > 0 else {}
+
         if self.path == '/auth':
-            length = int(self.headers.get('Content-Length', 0))
-            body = json.loads(self.rfile.read(length))
             email = body.get('email', '')
             password = body.get('password', '')
-
             if not email or not password:
                 self._json({'error': '邮箱和密码不能为空'}, 400)
                 return
-
             result, err = verify_login(email, password)
+            if err:
+                self._json({'error': err}, 401)
+            else:
+                self._json(result)
+
+        elif self.path == '/google-auth':
+            google_token = body.get('google_token', '')
+            if not google_token:
+                self._json({'error': '缺少 Google token'}, 400)
+                return
+            result, err = verify_google_login(google_token)
             if err:
                 self._json({'error': err}, 401)
             else:
@@ -223,13 +363,12 @@ class AuthHandler(BaseHTTPRequestHandler):
             self._json({'error': 'Not found'}, 404)
 
     def log_message(self, format, *args):
-        # 简洁日志
-        sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] {args[0]}\n")
+        log(args[0])
 
 def main():
     server = HTTPServer(('127.0.0.1', PORT), AuthHandler)
     print(f'🔐 Auth server running on http://127.0.0.1:{PORT}')
-    print(f'   /health  /auth (POST)  /data?token=xxx (GET)')
+    print(f'   /health  /auth  /google-auth  /data  /status')
     try:
         server.serve_forever()
     except KeyboardInterrupt:
