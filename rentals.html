@@ -269,16 +269,58 @@
     .login-overlay {
       position: fixed; inset: 0; z-index: 100;
       background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      padding: 1rem;
+      display: flex; align-items: flex-start; justify-content: center;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 0;
+    }
+    .login-scroll {
+      width: 100%; max-width: 380px;
+      padding: 1.5rem 1rem 2rem;
+      display: flex; flex-direction: column; align-items: center;
     }
     .login-card {
       width: 100%; max-width: 340px;
       background: var(--card-bg);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(245,158,11,0.15);
       border-radius: 1rem;
-      padding: 2rem 1.5rem;
+      padding: 1.5rem 1.2rem;
       text-align: center;
+      margin-top: 0.6rem;
+    }
+
+    /* ── Landing page elements ── */
+    .landing-hero {
+      text-align: center; padding: 0.5rem 0;
+    }
+    .landing-title {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: 0.02em;
+      margin-bottom: 0.2rem;
+    }
+    .landing-hero .landing-sub {
+      font-size: 0.72rem; color: var(--accent); font-weight: 500;
+      margin-bottom: 0.6rem;
+    }
+    .landing-desc {
+      font-size: 0.68rem; color: var(--text-muted);
+      line-height: 1.6; max-width: 300px; margin: 0 auto 0;
+    }
+    .landing-features {
+      display: flex; gap: 0.5rem;
+      margin: 1rem 0 0.5rem;
+    }
+    .lfeat {
+      flex: 1; text-align: center;
+      padding: 0.5rem 0.3rem;
+      border-radius: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+    }
+    .lfeat-icon { font-size: 1.2rem; margin-bottom: 0.2rem; }
+    .lfeat-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 500; }
+    .landing-promo {
+      text-align: center; margin-top: 1rem;
+      font-size: 0.62rem; color: #334155;
+      line-height: 1.6;
     }
     .login-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
     .login-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
@@ -330,6 +372,13 @@
       border: 1px solid var(--border);
       padding: 0.25rem 0.55rem; border-radius: 0.35rem;
       cursor: pointer; white-space: nowrap;
+    }
+    .nav-link {
+      font-size: 0.62rem; color: var(--cyan); font-weight: 500;
+      text-decoration: none;
+      padding: 0.2rem 0.5rem; border-radius: 1rem;
+      background: rgba(34,211,238,0.08);
+      white-space: nowrap;
     }
 
     /* ── Payment Overlay ── */
@@ -388,19 +437,53 @@
 
 <!-- Login overlay -->
 <div class="login-overlay" id="loginOverlay">
-  <div class="login-card">
-    <div class="login-icon">🏠</div>
-    <div class="login-title">JB Rentals</div>
-    <div class="login-sub">登录查看最新房源</div>
-    <input class="login-field" type="email" id="loginEmail" placeholder="📧 邮箱" autocomplete="email">
-    <input class="login-field" type="password" id="loginPw" placeholder="🔒 密码" autocomplete="current-password">
-    <button class="login-btn" id="loginBtn" onclick="doLogin()">登 录</button>
-    <div class="login-sep">
-      <span>或</span>
+  <div class="login-scroll">
+    <!-- Hero -->
+    <div class="landing-hero">
+      <div class="brand-dot" style="margin:0 auto 0.5rem"></div>
+      <div class="landing-title">Smart Tenancy Pro</div>
+      <div class="landing-sub">JB 租房数据雷达</div>
+      <div class="landing-desc">
+        5 个 FB 群组实时扫描 · 每日自动更新<br>
+        搜楼盘名，5 秒找到谁在卖 → 直接 WhatsApp 谈 cobroke
+      </div>
     </div>
-    <div id="googleBtn"></div>
-    <div class="login-error" id="loginError"></div>
-    <div class="login-foot">没有账号？联系客服开通<br>smarttenancypro@gmail.com</div>
+
+    <!-- Features -->
+    <div class="landing-features">
+      <div class="lfeat">
+        <div class="lfeat-icon">🔍</div>
+        <div class="lfeat-label">搜楼盘秒找</div>
+      </div>
+      <div class="lfeat">
+        <div class="lfeat-icon">📞</div>
+        <div class="lfeat-label">电话全显示</div>
+      </div>
+      <div class="lfeat">
+        <div class="lfeat-icon">🔄</div>
+        <div class="lfeat-label">30分更新</div>
+      </div>
+    </div>
+
+    <!-- Login card -->
+    <div class="login-card">
+      <div class="login-title">免费试用 3 天</div>
+      <div class="login-sub">Google 登录即开，不用填表</div>
+      <div id="googleBtn"></div>
+      <div class="login-sep"><span>或用邮箱登录</span></div>
+      <input class="login-field" type="email" id="loginEmail" placeholder="📧 邮箱" autocomplete="email">
+      <input class="login-field" type="password" id="loginPw" placeholder="🔒 密码" autocomplete="current-password">
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">登 录</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+
+    <!-- Cross-promo -->
+    <div class="landing-promo">
+      需要做租约合同？试试<br>
+      <a href="https://t.me/smarttenancypro_bot" target="_blank" style="color:var(--cyan);font-weight:600;">@smarttenancypro_bot →</a>
+    </div>
+
+    <div class="login-foot">有问题？smarttenancypro@gmail.com</div>
   </div>
 </div>
 
@@ -631,6 +714,7 @@ function renderStats() {
   let ago = min < 1 ? '刚刚' : min < 60 ? min + '分前' : Math.floor(min/60) + '时前';
   const name = localStorage.getItem(NAME_KEY) || '';
   document.getElementById('statPills').innerHTML =
+    `<a class="nav-link" href="https://t.me/smarttenancypro_bot" target="_blank">📄 合同Bot</a>` +
     `<span class="stat-pill"><b>${DATA.total}</b> 套房源</span>` +
     `<span class="stat-pill">🆕 <b>${DATA.today_new}</b> 今日</span>` +
     `<span class="stat-pill">${ago}</span>` +
