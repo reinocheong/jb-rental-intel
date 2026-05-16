@@ -168,6 +168,7 @@ Cron 每 30 分钟跑 `scripts/export_rentals_json.py`，仅导出到本地 `dat
 
 | 时间 | 命令 | 工作目录 | 职责 |
 |------|------|----------|------|
+| 每 5 分钟 | `auto_sync_tunnel.sh` | `/home/user/jb-rental-intel` | 🔐 检测 Cloudflare Tunnel URL 变化 → 自动同步 `rentals.html` + commit + push |
 | 每 30 分钟 | `node scraper/fb_scraper.js` | `/home/user/jb-rental-intel` | ① 采集 FB 帖子（6 群组） |
 | 每 30 分钟 | `python3 processors/fb_parser.py` | `/home/user/jb-rental-intel` | ② 解析 → Sheets |
 | 每天 10:29 | `python3 outreach/lib/maintain_agents.py` | `/home/user/jb-rental-intel` | ③ 更新 Agent List（去重） |
@@ -359,7 +360,8 @@ Parser 已集成 `normalize_property_name()` + `_is_valid_property_name()`，新
 | Rent 列为空但帖文有价格 | ① 价格被清洗函数吃掉 ② MYR 不被识别 | 已修：提取前先读 raw text + 支持 MYR；回填脚本见 /tmp/backfill_v2.py |
 | Phone 列格式混乱 | ① 旧数据未清洗 ② 新帖 Parser 未规范化 | ① `python3 scripts/clean_phones.py` ② Parser 已集成（2026-05-14） |
 | Sheet 美化后想还原 | 格式太花/不合口味 | `python3 scripts/reset_sheet_format.py` 一键清回裸数据 |
-| rentals.html 登录报错 | auth_server 或 Cloudflare Tunnel 挂了 | `bash auth/start_auth.sh` 重启，检查 `curl .../health` |
+| rentals.html 登录报错 | auth_server 或 Cloudflare Tunnel 挂了 | `bash auth/start_auth.sh` 重启，检查 `curl .../health`；隧道 URL 变化由 `auto_sync_tunnel.sh` 自动同步，无需手动更新 |
+| 隧道 URL 变了但 rentals.html 仍指向旧地址 | auto_sync 脚本未运行或失败 | 检查 cron `f508f32bed96` 状态；手动执行 `bash /home/user/jb-rental-intel/scripts/auto_sync_tunnel.sh` |
 
 ---
 
@@ -374,4 +376,5 @@ Parser 已集成 `normalize_property_name()` + `_is_valid_property_name()`，新
 | 租金回填 | `/tmp/backfill_v2.py` | 从 raw JSON 补填空租金（一次性的） |
 | Agent 名清理 | `/tmp/clean_agent_only.py` | 清掉FB随机用户名（一次性的） |
 | 🔐 Auth 服务 | `auth/start_auth.sh` | 启动 auth_server + Cloudflare Tunnel（@reboot cron） |
+| 🔐 隧道同步 | `scripts/auto_sync_tunnel.sh` | 每5分钟检测 Tunnel URL 变化 → 自动更新 `rentals.html` + push（cron 静默） |
 | 🔐 手动登录测试 | 打开 `https://reinocheong.github.io/jb-rental-intel/rentals.html` | 测试用户: test@example.com / test123 |
