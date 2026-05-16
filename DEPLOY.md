@@ -166,11 +166,12 @@ Cron 每 30 分钟跑 `scripts/export_rentals_json.py`，仅导出到本地 `dat
 
 ## Cron 调度（全链路自动化）
 
+> **2026-05-16 优化：** 除隧道同步外，13个任务已切为 `no_agent=true`（纯脚本模式，零LLM费用）。崩了自动发告警，不再每趟调大模型。Form自动检查已删除（用户改用Google登录）。
+
 | 时间 | 命令 | 工作目录 | 职责 |
 |------|------|----------|------|
 | 每 5 分钟 | `auto_sync_tunnel.sh` | `/home/user/jb-rental-intel` | 🔐 检测 Cloudflare Tunnel URL 变化 → 自动同步 `rentals.html` + commit + push |
 | 每 30 分钟 | `node scraper/fb_scraper.js` | `/home/user/jb-rental-intel` | ① 采集 FB 帖子（6 群组） |
-| 每 30 分钟 | `python3 processors/fb_parser.py` | `/home/user/jb-rental-intel` | ② 解析 → Sheets |
 | 每天 10:29 | `python3 outreach/lib/maintain_agents.py` | `/home/user/jb-rental-intel` | ③ 更新 Agent List（去重） |
 | 每天 10:30 | `python3 outreach/outreach_engine.py --send --slot 1 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段①（1人） |
 | 每天 11:30 | `python3 outreach/outreach_engine.py --send --slot 2 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段②（1人） |
@@ -285,9 +286,6 @@ python3 sub_mgr.py remind
 
 # Stripe 付款检测 → 自动续费
 python3 sub_mgr.py stripe-check
-
-# Form 注册检测 → 自动开试用
-python3 sub_mgr.py form-process
 ```
 
 ---
