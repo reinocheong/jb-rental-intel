@@ -2,7 +2,7 @@
 
 > 项目：Smart Tenancy Pro — JB 房产数据 SaaS  
 > 根目录：`/home/user/jb-rental-intel/`  
-> 最后更新：2026-05-15
+> 最后更新：2026-05-18
 
 ---
 
@@ -88,6 +88,8 @@ nohup node wa/wa_daemon.js > .logs/wa_daemon.log 2>&1 &
 cd /home/user/jb-rental-intel/scraper
 node fb_scraper.js
 ```
+
+> **2026-05-18 重构：** 改为全局复用 1 个 Chromium 浏览器（而非每个群组启动一个），finally 块逐层 try/catch 防级联崩溃，每群组 60s 超时保护。详见 [README.md#修复记录](README.md)。
 
 ### 3. 解析器（手动运行）
 
@@ -346,8 +348,9 @@ Parser 已集成 `normalize_property_name()` + `_is_valid_property_name()`，新
 
 | 症状 | 可能原因 | 解决 |
 |------|----------|------|
-| 爬虫 0 条帖子 | FB Cookie 过期 | 重新获取 Cookie |
-| `browser has been closed` | FB 反爬检测 | 增加 `waitForTimeout` 间隔 |
+| 爬虫 0 条帖子 | FB Cookie 过期 | 重新获取 Cookie，日志里出现 "browser context has been closed" 也可能提示 cookie 问题 |
+| `browser has been closed` / `page has been closed` | ① FB Cookie 过期 → 部分群组重定向到登录页 ② 浏览器资源耗尽（多实例同时启动） | ① 更新 Cookie ② 2026-05-18 已重构为单浏览器复用，基本消除 |
+| 单个群组超时 | FB 页面加载慢 / DOM 结构变化 / 反爬 | 超时自动跳过不阻塞后续群组，无需手动干预 |
 | WhatsApp 发不出去 | Daemon 掉线 | 重启 `node wa/wa_daemon.js` |
 | `RefreshError: invalid_scope` | SA Key 没共享给目标 Sheet | 在 Sheet 中共享给 SA 邮箱（编辑者） |
 | Stripe 检测不到付款 | Token 过期 | 检查 `.env` 中 `STRIPE_SECRET_KEY` |
