@@ -36,7 +36,18 @@ const GROUPS = [
 const DATA_DIR = '/home/user/fb_data/';
 const OUTPUT_JSON = DATA_DIR + 'fb_posts_raw.json';
 
-const GROUP_TIMEOUT = 60000; // 60s per group max (some groups are heavy)
+// ============================================================
+// HELPERS
+// ============================================================
+
+async function launchBrowser() {
+  return chromium.launch({ headless: true });
+}
+
+function isBrowserDeadError(errMsg) {
+  // FB anti-bot / session kill closes the browser or page
+  return /(?:Target|browser|context).*(?:closed|been closed)/i.test(errMsg || '');
+}
 
 // ============================================================
 // SCRAPER
@@ -94,7 +105,6 @@ async function scrapeGroup(browser, groupId, groupName) {
 
     // 6. Merge: post-expand first (preferred), pre-expand fill gaps
     const seenLinks = new Set();
-
     for (const p of postExpandPosts) {
       if (p.postLink) seenLinks.add(p.postLink);
       posts.push(buildPost(groupId, groupName, p));
@@ -108,14 +118,11 @@ async function scrapeGroup(browser, groupId, groupName) {
     console.log(`[${groupName}] 结束: ${articleCount} articles, ${preExpandPosts.length}/${postExpandPosts.length} pre/post, ${expandClicked} expands -> ${posts.length} posts`);
   } catch (e) {
     console.error(`[${groupName}] Error: ${e.message}`);
+    // Re-throw browser-dead errors so main loop can re-launch
+    if (isBrowserDeadError(e.message)) throw e;
   } finally {
-    // Graceful cleanup — don't let close failures cascade
-    try {
-      if (page) await page.close().catch(() => {});
-    } catch (_) {}
-    try {
-      if (context) await context.close().catch(() => {});
-    } catch (_) {}
+    try { if (page) await page.close().catch(() => {}); } catch (_) {}
+    try { if (context) await context.close().catch(() => {}); } catch (_) {}
   }
   return posts;
 }
@@ -144,35 +151,46 @@ function buildPost(groupId, groupName, p) {
   let allPosts = [];
   let browser = null;
 
-  try {
-    // Launch ONE browser for all groups
-    browser = await chromium.launch({ headless: true });
+  for (let gi = 0; gi < GROUPS.length; gi++) {
+    const g = GROUPS[gi];
+    try {
+      // Ensure live browser
+      if (!browser) {
+        browser = await launchBrowser();
+      }
 
-    for (const g of GROUPS) {
-      try {
-        // Run each group with a timeout
-        const groupPosts = await Promise.race([
-          scrapeGroup(browser, g.id, g.name),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Group timed out')), GROUP_TIMEOUT)
-          ),
-        ]);
-        allPosts = allPosts.concat(groupPosts || []);
-      } catch (e) {
+      const groupPosts = await scrapeGroup(browser, g.id, g.name);
+      allPosts = allPosts.concat(groupPosts || []);
+    } catch (e) {
+      // Browser died → close it, re-launch, retry this group once
+      if (isBrowserDeadError(e.message)) {
+        console.error(`[${g.name}] Browser dead, re-launching...`);
+        try { if (browser) await browser.close().catch(() => {}); } catch (_) {}
+        browser = null;
+
+        // Retry once with fresh browser
+        try {
+          browser = await launchBrowser();
+          const retryPosts = await scrapeGroup(browser, g.id, g.name);
+          allPosts = allPosts.concat(retryPosts || []);
+          console.error(`[${g.name}] Retry OK`);
+        } catch (e2) {
+          console.error(`[${g.name}] Retry also failed: ${e2.message}`);
+          try { if (browser) await browser.close().catch(() => {}); } catch (_) {}
+          browser = null;
+        }
+      } else {
         console.error(`[${g.name}] Fatal: ${e.message}`);
       }
     }
-  } catch (e) {
-    console.error(`[scraper] Browser error: ${e.message}`);
-  } finally {
-    try {
-      if (browser) await browser.close().catch(() => {});
-    } catch (_) {}
   }
+
+  // Final cleanup
+  try { if (browser) await browser.close().catch(() => {}); } catch (_) {}
 
   if (allPosts.length === 0) {
     console.log(JSON.stringify({ error: 'no posts' }));
-    return;
+    process.exit(0);
   }
 
   // Dedup + append
@@ -195,4 +213,5 @@ function buildPost(groupId, groupName, p) {
       posts: allPosts.filter(p => p.group_id === g.id).length
     }))
   }));
+  process.exit(0);
 })();

@@ -173,7 +173,8 @@ Cron 每 30 分钟跑 `scripts/export_rentals_json.py`，仅导出到本地 `dat
 | 时间 | 命令 | 工作目录 | 职责 |
 |------|------|----------|------|
 | 每 5 分钟 | `auto_sync_tunnel.sh` | `/home/user/jb-rental-intel` | 🔐 检测 Cloudflare Tunnel URL 变化 → 自动同步 `rentals.html` + commit + push |
-| 每 30 分钟 | `node scraper/fb_scraper.js` | `/home/user/jb-rental-intel` | ① 采集 FB 帖子（6 群组） |
+| 每 30 分钟 (:00/:30) | `node scraper/fb_scraper.js` | `/home/user/jb-rental-intel` | ① 采集 FB 帖子（5 群组） |
+| 每 30 分钟 (:03/:33) | `python3 processors/fb_parser.py` | `/home/user/jb-rental-intel` | ② 解析入 Google Sheets |
 | 每天 10:29 | `python3 outreach/lib/maintain_agents.py` | `/home/user/jb-rental-intel` | ③ 更新 Agent List（去重） |
 | 每天 10:30 | `python3 outreach/outreach_engine.py --send --slot 1 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段①（1人） |
 | 每天 11:30 | `python3 outreach/outreach_engine.py --send --slot 2 --total-slots 5` | `/home/user/jb-rental-intel` | ③ 推广时段②（1人） |
