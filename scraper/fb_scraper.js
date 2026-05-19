@@ -54,7 +54,7 @@ function isBrowserDeadError(errMsg) {
 // ============================================================
 
 async function scrapeGroup(browser, groupId, groupName) {
-  console.log(`[${groupName}] 开始抓取...`);
+  console.log(`[scraper][${groupName}] 开始抓取...`);
 
   let context = null;
   let page = null;
@@ -77,7 +77,7 @@ async function scrapeGroup(browser, groupId, groupName) {
     try {
       await page.waitForSelector('[role="article"]', { timeout: 10000 });
     } catch (e) {
-      console.log(`[${groupName}] No articles within 10s, continuing`);
+      console.log(`[scraper][${groupName}] No articles within 10s, continuing`);
     }
 
     // 2. Scroll to load posts
@@ -93,7 +93,7 @@ async function scrapeGroup(browser, groupId, groupName) {
     }
 
     // 3. Extract BEFORE expanding (reliable baseline)
-    console.log(`[${groupName}] 数据处理中...`);
+    console.log(`[scraper][${groupName}] 数据处理中...`);
     const preExpandPosts = await extractPosts(page, groupId);
 
     // 4. Click all expand buttons
@@ -115,9 +115,11 @@ async function scrapeGroup(browser, groupId, groupName) {
       posts.push(buildPost(groupId, groupName, p));
     }
 
-    console.log(`[${groupName}] 结束: ${articleCount} articles, ${preExpandPosts.length}/${postExpandPosts.length} pre/post, ${expandClicked} expands -> ${posts.length} posts`);
+    console.log(`[scraper][${groupName}] 结束: ${articleCount} articles, ${preExpandPosts.length}/${postExpandPosts.length} pre/post, ${expandClicked} expands -> ${posts.length} posts`);
   } catch (e) {
-    console.error(`[${groupName}] Error: ${e.message}`);
+    const errMsg = `[scraper][${groupName}] Error: ${e.message}`;
+    console.error(errMsg);
+    fs.appendFileSync('/home/user/jb-rental-intel/.logs/error.log', `[${new Date().toISOString()}] [scraper/fb_scraper.js] [L120] [Group:${groupName}] -> ${e.stack}\n`);
     // Re-throw browser-dead errors so main loop can re-launch
     if (isBrowserDeadError(e.message)) throw e;
   } finally {
@@ -145,7 +147,7 @@ function buildPost(groupId, groupName, p) {
 // ============================================================
 
 (async () => {
-  console.log('[scraper] 开始');
+  console.log('[scraper][main] 开始');
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
   let allPosts = [];
@@ -164,7 +166,7 @@ function buildPost(groupId, groupName, p) {
     } catch (e) {
       // Browser died → close it, re-launch, retry this group once
       if (isBrowserDeadError(e.message)) {
-        console.error(`[${g.name}] Browser dead, re-launching...`);
+        console.error(`[scraper][${g.name}] Browser dead, re-launching...`);
         try { if (browser) await browser.close().catch(() => {}); } catch (_) {}
         browser = null;
 
@@ -173,14 +175,14 @@ function buildPost(groupId, groupName, p) {
           browser = await launchBrowser();
           const retryPosts = await scrapeGroup(browser, g.id, g.name);
           allPosts = allPosts.concat(retryPosts || []);
-          console.error(`[${g.name}] Retry OK`);
+          console.error(`[scraper][${g.name}] Retry OK`);
         } catch (e2) {
-          console.error(`[${g.name}] Retry also failed: ${e2.message}`);
+          console.error(`[scraper][${g.name}] Retry also failed: ${e2.message}`);
           try { if (browser) await browser.close().catch(() => {}); } catch (_) {}
           browser = null;
         }
       } else {
-        console.error(`[${g.name}] Fatal: ${e.message}`);
+        console.error(`[scraper][${g.name}] Fatal: ${e.message}`);
       }
     }
   }
@@ -204,7 +206,7 @@ function buildPost(groupId, groupName, p) {
   const merged = [...existing, ...newPosts];
   fs.writeFileSync(OUTPUT_JSON, JSON.stringify(merged, null, 2), 'utf-8');
 
-  console.log('[scraper] 结束');
+  console.log('[scraper][main] 结束');
   console.log(JSON.stringify({
     total: merged.length,
     new: newPosts.length,

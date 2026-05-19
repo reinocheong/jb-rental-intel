@@ -104,8 +104,9 @@ def check_user_status(row):
             expiry = datetime.fromisoformat(expiry_str)
             if expiry < datetime.now():
                 return False, '试用已到期，请续费订阅'
-        except:
-            pass
+        except Exception as e:
+            with open("/home/user/jb-rental-intel/.logs/error.log", "a") as f:
+                f.write(f"[{datetime.now().isoformat()}] [auth/auth_server.py] [L105] [CheckUserStatus] -> {e}\n")
 
     return True, None
 
@@ -198,7 +199,9 @@ def validate_token(token):
             expires = datetime.fromisoformat(row[3])
             if expires > datetime.now():
                 return True
-        except: pass
+        except Exception as e:
+            with open("/home/user/jb-rental-intel/.logs/error.log", "a") as f:
+                f.write(f"[{datetime.now().isoformat()}] [auth/auth_server.py] [L200] [ValidateToken] -> {e}\n")
     return False
 
 def get_user_status(email):
@@ -235,7 +238,9 @@ def get_rentals_data():
         try:
             if datetime.fromisoformat(scraped) >= today_start:
                 today_new += 1
-        except: pass
+        except Exception as e:
+            with open("/home/user/jb-rental-intel/.logs/error.log", "a") as f:
+                f.write(f"[{datetime.now().isoformat()}] [auth/auth_server.py] [L238] [GetRentalsNewCount] -> {e}\n")
 
         prop = d.get('property name', '').strip()
         if prop:
@@ -246,7 +251,9 @@ def get_rentals_data():
         if rent:
             try:
                 rent = f"{int(rent.replace(',', '')):,}"
-            except: pass
+            except Exception as e:
+                with open("/home/user/jb-rental-intel/.logs/error.log", "a") as f:
+                    f.write(f"[{datetime.now().isoformat()}] [auth/auth_server.py] [L249] [FormatRent] -> {e}\n")
 
         listings.append({
             'agent': d.get('agent name', '').strip(),

@@ -3,6 +3,5 @@ subscribers.db
 *.pyc
 __pycache__/
 .hermes/
-*.log
 .env
 data/rentals.json

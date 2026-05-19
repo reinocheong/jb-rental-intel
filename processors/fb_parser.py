@@ -899,6 +899,7 @@ def get_sheets_service():
     return build("sheets", "v4", credentials=creds)
 def build_sheets():
     """Read raw JSON, parse, append to Google Sheets."""
+    print("[processors/fb_parser.py][main] 开始")
     service = get_sheets_service()
     sheet = service.spreadsheets()
 
@@ -907,6 +908,8 @@ def build_sheets():
     if os.path.exists(RAW_JSON):
         with open(RAW_JSON, "r") as f:
             raw_posts = json.load(f)
+
+    print(f"[processors/fb_parser.py][processing] 加载了 {len(raw_posts)} 条原始数据")
 
     # Parse all posts — clean first, then filter (order: 求租 > comment_thread > non_rental)
     parsed = []
@@ -940,6 +943,8 @@ def build_sheets():
         seen.add(key)
         parsed.append(row)
 
+    print(f"[processors/fb_parser.py][processing] 解析完成，待去重条数: {len(parsed)}")
+
     # Read existing data from Google Sheets for dedup
     existing_links = set()
     existing_phones = set()
@@ -969,7 +974,10 @@ def build_sheets():
                 if key.strip('|'):
                     existing_texts.add(key)
         total_rows = len(values)
-    except Exception:
+    except Exception as e:
+        print(f"[processors/fb_parser.py][error] 读取 Sheet 失败: {e}")
+        with open("/home/user/jb-rental-intel/.logs/error.log", "a") as f:
+             f.write(f"[{datetime.now().isoformat()}] [processors/fb_parser.py] [L973] [BuildSheets] -> {e}\n")
         total_rows = 0
 
     # Filter out duplicates
@@ -1032,13 +1040,16 @@ def build_sheets():
             ])
         
         end_col = chr(64 + len(HEADERS))
-        sheet.values().update(
+        sheet.values().append(
             spreadsheetId=SHEET_ID,
-            range=f"{SHEET_NAME}!A{next_row}:{end_col}{next_row + len(values) - 1}",
+            range=f"{SHEET_NAME}!A:{end_col}",
             body={"values": values},
-            valueInputOption="RAW"
+            valueInputOption="RAW",
+            insertDataOption="INSERT_ROWS"
         ).execute()
         new_rows = len(values)
+
+    print(f"[processors/fb_parser.py][main] 结束，新增 {new_rows} 条")
 
     return {
         "total_rows": total_rows + new_rows - (1 if total_rows == 0 else 0),
