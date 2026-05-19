@@ -5,3 +5,22 @@ __pycache__/
 .hermes/
 .env
 data/rentals.json
+
+# Security
+gen-lang-client-*.json
+wa_session/
+wa/wa_session
+
+# Logs
+.logs/
+*.log
+
+# Artifacts
+.form_processed.json
+processed_payments.txt
+archived/
+outreach/agent_phones.txt
+
+# Node
+package-lock.json
+node_modules/
